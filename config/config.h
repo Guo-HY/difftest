@@ -47,11 +47,6 @@
 #define DEFAULT_EMU_FLASH_SIZE (32 * 1024UL) // 4 MB
 extern unsigned long EMU_FLASH_SIZE;
 
-// Use sdl to show screen
-// Note: It does not work well with clang, to use that, switch to gcc
-// uncomment the following line to enable this feature
-// #define SHOW_SCREEN
-
 // -----------------------------------------------------------------------
 // Difftest interface config
 // -----------------------------------------------------------------------
