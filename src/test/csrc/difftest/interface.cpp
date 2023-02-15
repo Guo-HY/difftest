@@ -420,3 +420,16 @@ INTERFACE_RUNAHEAD_MEMDEP_PRED {
   }
   *oracle_vaddr = packet->oracle_vaddr;
 }
+
+INTERFACE_ICACHE_DEBUG {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_debug_event();
+  packet->write_en = write_en;
+  if (packet->write_en) {
+    packet->pidx = pidx;
+    packet->ptag = ptag;
+    packet->time = time;
+    packet->waymask = waymask;
+    packet->write_master = write_master;
+  }
+}

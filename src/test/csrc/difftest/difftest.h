@@ -216,6 +216,15 @@ typedef struct {
 } physical_reg_state_t;
 
 typedef struct {
+  uint8_t   write_en;
+  uint8_t   write_master;
+  u_int64_t ptag;
+  u_int64_t pidx;
+  u_int32_t waymask;
+  u_int64_t time;
+} icache_sim_debug_event_t;
+
+typedef struct {
   trap_event_t      trap;
   arch_event_t      event;
   instr_commit_t    commit[DIFFTEST_COMMIT_WIDTH];
@@ -239,6 +248,7 @@ typedef struct {
   run_ahead_redirect_event_t runahead_redirect;
   run_ahead_memdep_pred_t runahead_memdep_pred[DIFFTEST_RUNAHEAD_WIDTH];
   physical_reg_state_t pregs;
+  icache_sim_debug_event_t icache_sim_debug_event;
 } difftest_core_state_t;
 
 enum retire_inst_type {
@@ -391,6 +401,10 @@ public:
   }
   inline debug_mode_t *get_debug_state() {
     return &(dut.dmregs);
+  }
+
+  inline icache_sim_debug_event_t* get_icache_sim_debug_event() {
+    return &(dut.icache_sim_debug_event);
   }
 
 #ifdef DEBUG_REFILL

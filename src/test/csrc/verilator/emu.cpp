@@ -33,6 +33,7 @@
 #include "compress.h"
 #include "lightsss.h"
 #include "remote_bitbang.h"
+#include "icache_sim.h"
 
 extern remote_bitbang_t * jtag;
 
@@ -347,6 +348,8 @@ uint64_t Emulator::execute(uint64_t max_cycle, uint64_t max_instr) {
     runahead_init();
   }
 
+  icache_sim_init();
+
 #ifdef DEBUG_REFILL
   difftest[0]->save_track_instr(args.track_instr);
 #endif
@@ -461,6 +464,8 @@ uint64_t Emulator::execute(uint64_t max_cycle, uint64_t max_instr) {
     if (args.enable_runahead) {
       runahead_step();
     }
+
+    icache_sim_step();
 
 #ifdef VM_SAVABLE
     static int snapshot_count = 0;

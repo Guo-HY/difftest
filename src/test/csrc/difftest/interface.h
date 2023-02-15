@@ -23,6 +23,7 @@
 
 #include "difftest.h"
 #include "runahead.h"
+#include "icache_sim.h"
 
 // #ifdef __cplusplus
 // extern "C" {
@@ -454,6 +455,18 @@ extern "C" int v_difftest_step();
     uint64_t* oracle_vaddr                         \
   )
 
+// v_difftest_ICacheDebug
+#define INTERFACE_ICACHE_DEBUG                    \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheDebug) (          \
+    DPIC_ARG_BYTE coreid,                         \
+    DPIC_ARG_BIT  write_en,                       \
+    DPIC_ARG_BIT  write_master,                   \
+    DPIC_ARG_LONG ptag,                           \
+    DPIC_ARG_LONG pidx,                           \
+    DPIC_ARG_INT  waymask,                        \
+    DPIC_ARG_LONG time                            \
+  )
+
 INTERFACE_BASIC_INSTR_COMMIT;
 INTERFACE_ARCH_EVENT;
 INTERFACE_INSTR_COMMIT;
@@ -476,5 +489,6 @@ INTERFACE_RUNAHEAD_EVENT;
 INTERFACE_RUNAHEAD_COMMIT_EVENT;
 INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
+INTERFACE_ICACHE_DEBUG;
 
 #endif
