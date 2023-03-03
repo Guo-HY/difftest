@@ -49,6 +49,12 @@ class DifftestTop extends Module {
     var difftest_runahead_commit_event = Module(new DifftestRunaheadCommitEvent);
     var difftest_runahead_redirect_event = Module(new DifftestRunaheadRedirectEvent);
     var difftest_runahead_memdep_pred = Module(new DifftestRunaheadMemdepPred);
+
+    var difftest_DifftestICacheIpfRefill = Module(new DifftestICacheIpfRefill)
+    var difftest_DifftestICacheRead = Module(new DifftestICacheRead)
+    var difftest_DifftestICacheRefill = Module(new DifftestICacheRefill)
+    var difftest_DifftestICacheReq = Module(new DifftestICacheReq)
+    var difftest_DifftestICacheResp = Module(new DifftestICacheResp)
 }
 
 object DifftestMain extends App {

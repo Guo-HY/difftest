@@ -218,6 +218,43 @@ class DiffRunaheadMemdepPredIO extends DifftestBundle with DifftestWithIndex {
   val oracle_vaddr  = Output(UInt(64.W))
 }
 
+trait DifftestWithTime {
+  val time = Input(UInt(64.W))
+}
+
+trait DifftestWithValid {
+  val valid = Input(Bool())
+}
+/* ipf refill action */
+class DiffICacheIpfRefillIO extends DifftestBundle with DifftestWithValid with DifftestWithTime {
+  val paddr = Input(UInt(64.W))
+  val write_ptr = Input(UInt(32.W))
+}
+
+/* mainPipe read action */
+class DiffICacheReadIO extends DifftestBundle with DifftestWithIndex with DifftestWithTime with DifftestWithValid {
+  val hit_in_array = Input(Bool())
+  val hit_in_ipf = Input(Bool())
+  val hit_in_piq = Input(Bool())
+  val hit_paddr = Input(UInt(64.W))
+}
+
+/* write cache array action */
+class DiffICacheRefillIO extends DifftestBundle with DifftestWithTime with DifftestWithValid {
+  val write_master = Input(Bool())
+  val ptag = Input(UInt(64.W))
+  val pidx = Input(UInt(64.W))
+  val waymask = Input(UInt(32.W))
+}
+
+/* ICache AMAT */
+class DiffICacheReq extends DifftestBundle with DifftestWithTime with DifftestWithValid with DifftestWithIndex {
+  val vaddr = Input(UInt(64.W))
+}
+class DiffICacheResp extends DifftestBundle with DifftestWithTime with DifftestWithValid with DifftestWithIndex {
+  val vaddr = Input(UInt(64.W))
+}
+
 abstract class DifftestModule[T <: DifftestBundle] extends ExtModule with HasExtModuleInline
 {
   val io: T
@@ -314,6 +351,12 @@ class DifftestRunaheadEvent extends DifftestBaseModule(new DiffRunaheadEventIO)
 class DifftestRunaheadCommitEvent extends DifftestBaseModule(new DiffRunaheadCommitEventIO)
 class DifftestRunaheadRedirectEvent extends DifftestBaseModule(new DiffRunaheadRedirectEventIO)
 class DifftestRunaheadMemdepPred extends DifftestBaseModule(new DiffRunaheadMemdepPredIO)
+
+class DifftestICacheIpfRefill extends DifftestBaseModule(new DiffICacheIpfRefillIO)
+class DifftestICacheRead extends DifftestBaseModule(new DiffICacheReadIO)
+class DifftestICacheRefill extends DifftestBaseModule(new DiffICacheRefillIO)
+class DifftestICacheReq extends DifftestBaseModule(new DiffICacheReq)
+class DifftestICacheResp extends DifftestBaseModule(new DiffICacheResp)
 
 // Difftest emulator top
 
