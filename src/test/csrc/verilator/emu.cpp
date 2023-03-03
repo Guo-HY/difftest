@@ -436,10 +436,14 @@ uint64_t Emulator::execute(uint64_t max_cycle, uint64_t max_instr) {
         dut_ptr->io_perfInfo_clean = 1;
         dut_ptr->io_perfInfo_dump = 1;
         args.warmup_instr = -1;
+        icache_sim_dump();
+        icache_sim_clean_perf_info();
       }
       if (trap->cycleCnt % args.stat_cycles == args.stat_cycles - 1) {
         dut_ptr->io_perfInfo_clean = 1;
         dut_ptr->io_perfInfo_dump = 1;
+        icache_sim_dump();
+        icache_sim_clean_perf_info();
       }
     }
 
@@ -629,6 +633,7 @@ inline void Emulator::save_coverage(time_t t) {
 
 void Emulator::trigger_stat_dump() {
   dut_ptr->io_perfInfo_dump = 1;
+  icache_sim_dump();
   if(get_args().force_dump_result) {
     dut_ptr->io_logCtrl_log_end = -1;
   }

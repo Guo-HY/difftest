@@ -421,15 +421,59 @@ INTERFACE_RUNAHEAD_MEMDEP_PRED {
   *oracle_vaddr = packet->oracle_vaddr;
 }
 
-INTERFACE_ICACHE_DEBUG {
+INTERFACE_ICACHE_IPF_REFILL {
   if (icacheSim == NULL) return;
-  auto packet = difftest[coreid]->get_icache_sim_debug_event();
-  packet->write_en = write_en;
-  if (packet->write_en) {
+  auto packet = difftest[coreid]->get_icache_sim_ipf_refill();
+  packet->valid = valid;
+  if (packet->valid) {
+    packet->time = time;
+    packet->paddr = paddr;
+    packet->write_ptr = write_ptr;
+  }
+}
+
+INTERFACE_ICACHE_READ {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_read();
+  packet->port[index].valid = valid;
+  if (valid) {
+    packet->port[index].time = time;
+    packet->port[index].hit_in_array = hit_in_array;
+    packet->port[index].hit_in_ipf = hit_in_ipf;
+    packet->port[index].hit_in_piq = hit_in_piq;
+    packet->port[index].hit_paddr = hit_paddr;
+  }
+}
+
+INTERFACE_ICACHE_REFILL {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_refill();
+  packet->valid = valid;
+  if (valid) {
     packet->pidx = pidx;
     packet->ptag = ptag;
     packet->time = time;
     packet->waymask = waymask;
     packet->write_master = write_master;
+  }
+}
+
+INTERFACE_ICACHE_REQ {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_req();
+  packet->port[index].valid = valid;
+  if (valid) {
+    packet->port[index].time = time;
+    packet->port[index].vaddr = vaddr;
+  }
+}
+
+INTERFACE_ICACHE_RESP {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_resp();
+  packet->port[index].valid = valid;
+  if (valid) {
+    packet->port[index].time = time;
+    packet->port[index].vaddr = vaddr;
   }
 }

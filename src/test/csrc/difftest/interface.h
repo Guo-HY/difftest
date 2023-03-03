@@ -455,16 +455,54 @@ extern "C" int v_difftest_step();
     uint64_t* oracle_vaddr                         \
   )
 
-// v_difftest_ICacheDebug
-#define INTERFACE_ICACHE_DEBUG                    \
-  DIFFTEST_DPIC_FUNC_DECL(ICacheDebug) (          \
-    DPIC_ARG_BYTE coreid,                         \
-    DPIC_ARG_BIT  write_en,                       \
-    DPIC_ARG_BIT  write_master,                   \
-    DPIC_ARG_LONG ptag,                           \
-    DPIC_ARG_LONG pidx,                           \
-    DPIC_ARG_INT  waymask,                        \
-    DPIC_ARG_LONG time                            \
+#define INTERFACE_ICACHE_IPF_REFILL                 \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheIpfRefill) (        \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_LONG time,                             \
+    DPIC_ARG_LONG paddr,                            \
+    DPIC_ARG_INT  write_ptr                         \
+  )
+
+#define INTERFACE_ICACHE_READ                       \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheRead) (             \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_BYTE index,                            \
+    DPIC_ARG_LONG time,                             \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BIT  hit_in_array,                     \
+    DPIC_ARG_BIT  hit_in_ipf,                       \
+    DPIC_ARG_BIT  hit_in_piq,                       \
+    DPIC_ARG_LONG hit_paddr                         \
+  )
+
+#define INTERFACE_ICACHE_REFILL                     \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheRefill) (           \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_LONG time,                             \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BIT  write_master,                     \
+    DPIC_ARG_LONG ptag,                             \
+    DPIC_ARG_LONG pidx,                             \
+    DPIC_ARG_INT  waymask                           \
+  )
+
+#define INTERFACE_ICACHE_REQ                        \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheReq) (              \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_LONG time,                             \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BYTE index,                            \
+    DPIC_ARG_LONG vaddr                             \
+  )
+
+#define INTERFACE_ICACHE_RESP                        \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheResp) (              \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_LONG time,                             \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BYTE index,                            \
+    DPIC_ARG_LONG vaddr                             \
   )
 
 INTERFACE_BASIC_INSTR_COMMIT;
@@ -489,6 +527,11 @@ INTERFACE_RUNAHEAD_EVENT;
 INTERFACE_RUNAHEAD_COMMIT_EVENT;
 INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
-INTERFACE_ICACHE_DEBUG;
+
+INTERFACE_ICACHE_IPF_REFILL;
+INTERFACE_ICACHE_READ;
+INTERFACE_ICACHE_REFILL;
+INTERFACE_ICACHE_REQ;
+INTERFACE_ICACHE_RESP;
 
 #endif
