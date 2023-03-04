@@ -255,6 +255,18 @@ class DiffICacheResp extends DifftestBundle with DifftestWithTime with DifftestW
   val vaddr = Input(UInt(64.W))
 }
 
+/* ideal icache sim info */
+class DiffICacheIdealRefillIO extends DifftestBundle with DifftestWithValid with DifftestWithIndex {
+  val paddr = Input(UInt(64.W))
+  val data_vec = Vec(8, Input(UInt(64.W)))
+}
+
+class DiffICacheIdealReadIO extends DifftestBundle with DifftestWithValid with DifftestWithIndex {
+  val paddr = Input(UInt(64.W))
+  val hitInIdealCache = Output(Bool())
+  val hitData = Output(Vec(8, UInt(64.W)))
+}
+
 abstract class DifftestModule[T <: DifftestBundle] extends ExtModule with HasExtModuleInline
 {
   val io: T
@@ -357,6 +369,8 @@ class DifftestICacheRead extends DifftestBaseModule(new DiffICacheReadIO)
 class DifftestICacheRefill extends DifftestBaseModule(new DiffICacheRefillIO)
 class DifftestICacheReq extends DifftestBaseModule(new DiffICacheReq)
 class DifftestICacheResp extends DifftestBaseModule(new DiffICacheResp)
+class DifftestICacheIdealRefill extends DifftestBaseModule(new DiffICacheIdealRefillIO)
+class DifftestICacheIdealRead extends DifftestBaseModule(new DiffICacheIdealReadIO)
 
 // Difftest emulator top
 
