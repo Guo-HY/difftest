@@ -32,66 +32,6 @@ class ICacheSim;
 class MetaArray;
 class IpfBuffer;
 
-typedef struct {
-  uint8_t valid;
-  u_int64_t time;
-  u_int64_t paddr;
-  u_int32_t write_ptr;
-} icache_sim_ipf_refill_event_t;
-
-typedef struct {
-  struct item {
-    uint8_t valid;
-    u_int64_t time;
-    u_int8_t hit_in_array;
-    uint8_t hit_in_ipf;
-    uint8_t hit_in_piq;
-    uint64_t hit_paddr;
-  }port[ICACHE_READ_PORT_WIDTH];
-} icache_sim_read_event_t;
-
-typedef struct {
-  uint8_t valid;
-  u_int64_t time;
-  u_int8_t write_master;
-  uint64_t ptag;
-  uint64_t pidx;
-  uint32_t waymask;
-} icache_sim_refill_event_t;
-
-typedef struct {
-  struct item {
-    uint8_t valid;
-    u_int64_t time;
-    u_int64_t vaddr;
-  }port[ICACHE_READ_PORT_WIDTH];
-} icache_sim_req_event_t;
-
-typedef struct {
-  struct item {
-    uint8_t valid;
-    u_int64_t time;
-    u_int64_t vaddr;
-  }port[ICACHE_READ_PORT_WIDTH];
-} icache_sim_resp_event_t;
-
-typedef struct {
-  uint8_t valid;
-  uint64_t paddr;
-  uint64_t data[CACHELINE_BEAT_NUM];
-} icache_sim_ideal_refill_t;
-
-typedef struct {
-  /* input */
-  uint8_t valid[ICACHE_READ_PORT_WIDTH];
-  uint64_t paddr[ICACHE_READ_PORT_WIDTH];
-  /* output */
-  struct item {
-    uint8_t isHit;
-    uint64_t hitData[CACHELINE_BEAT_NUM];
-  }port[ICACHE_READ_PORT_WIDTH];
-} icache_sim_ideal_read_t;
-
 enum ICacheRefillMaster {
   MISSUNIT_IRM,
   IPF_IRM,
