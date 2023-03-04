@@ -19,7 +19,6 @@
 
 #include "common.h"
 #include "refproxy.h"
-#include "icache_sim.h"
 
 #define DIFFTEST_CORE_NUMBER  NUM_CORES
 
@@ -231,7 +230,7 @@ typedef struct {
     uint8_t hit_in_ipf;
     uint8_t hit_in_piq;
     uint64_t hit_paddr;
-  }port[ICACHE_READ_PORT_WIDTH];
+  }port[2];
 } icache_sim_read_event_t;
 
 typedef struct {
@@ -248,7 +247,7 @@ typedef struct {
     uint8_t valid;
     u_int64_t time;
     u_int64_t vaddr;
-  }port[ICACHE_READ_PORT_WIDTH];
+  }port[2];
 } icache_sim_req_event_t;
 
 typedef struct {
@@ -256,24 +255,24 @@ typedef struct {
     uint8_t valid;
     u_int64_t time;
     u_int64_t vaddr;
-  }port[ICACHE_READ_PORT_WIDTH];
+  }port[2];
 } icache_sim_resp_event_t;
 
 typedef struct {
   uint8_t valid;
   uint64_t paddr;
-  uint64_t data[CACHELINE_BEAT_NUM];
+  uint64_t data[8];
 } icache_sim_ideal_refill_t;
 
 typedef struct {
   /* input */
-  uint8_t valid[ICACHE_READ_PORT_WIDTH];
-  uint64_t paddr[ICACHE_READ_PORT_WIDTH];
+  uint8_t valid[2];
+  uint64_t paddr[2];
   /* output */
   struct item {
     uint8_t isHit;
-    uint64_t hitData[CACHELINE_BEAT_NUM];
-  }port[ICACHE_READ_PORT_WIDTH];
+    uint64_t hitData[8];
+  }port[2];
 } icache_sim_ideal_read_t;
 
 typedef struct {
