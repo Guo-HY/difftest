@@ -30,6 +30,7 @@
 
 class ICacheSim;
 class MetaArray;
+class IpfBuffer;
 
 typedef struct {
   uint8_t valid;
