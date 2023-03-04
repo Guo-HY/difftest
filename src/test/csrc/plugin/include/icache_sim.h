@@ -8,6 +8,7 @@
 #include <string>
 
 // #define ENABLE_PERF_COUNTER 1
+#define ENABLE_IDEAL_ICACHE 1
 
 // TODO this is ugly
 // #define SET_NUM 128

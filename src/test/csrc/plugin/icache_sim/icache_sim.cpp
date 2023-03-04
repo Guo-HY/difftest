@@ -80,6 +80,9 @@ int ICacheSim::doRead(icache_sim_read_event_t* readEvent)
 int ICacheSim::step()
 {
   cycle++;
+#ifdef ENABLE_IDEAL_ICACHE
+  refillIdealCache(&(dut_ptr->icache_sim_ideal_refill));
+#endif
 #ifdef ENABLE_PERF_COUNTER
   doRead(&(dut_ptr->icache_sim_read));
   metaArray->checkMultiHit(&(dut_ptr->icache_sim_refill));
