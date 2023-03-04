@@ -505,6 +505,39 @@ extern "C" int v_difftest_step();
     DPIC_ARG_LONG vaddr                             \
   )
 
+#define INTERFACE_ICACHE_IDEAL_REFILL               \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheIdealRefill)(       \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BYTE index,                            \
+    DPIC_ARG_LONG paddr,                            \
+    DPIC_ARG_LONG data_vec_0,                       \
+    DPIC_ARG_LONG data_vec_1,                       \
+    DPIC_ARG_LONG data_vec_2,                       \
+    DPIC_ARG_LONG data_vec_3,                       \
+    DPIC_ARG_LONG data_vec_4,                       \
+    DPIC_ARG_LONG data_vec_5,                       \
+    DPIC_ARG_LONG data_vec_6,                       \
+    DPIC_ARG_LONG data_vec_7                        \
+  )
+
+#define INTERFACE_ICACHE_IDEAL_READ                 \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheIdealRead)(         \
+    DPIC_ARG_BYTE coreid,                           \
+    DPIC_ARG_BIT  valid,                            \
+    DPIC_ARG_BYTE index,                            \
+    DPIC_ARG_LONG paddr,                          \
+    DPIC_ARG_BIT* hitInIdealCache,                \
+    DPIC_ARG_LONG* hitData_0,                 \
+    DPIC_ARG_LONG* hitData_1,                 \
+    DPIC_ARG_LONG* hitData_2,                 \
+    DPIC_ARG_LONG* hitData_3,                 \
+    DPIC_ARG_LONG* hitData_4,                 \
+    DPIC_ARG_LONG* hitData_5,                 \
+    DPIC_ARG_LONG* hitData_6,                 \
+    DPIC_ARG_LONG* hitData_7                  \
+  )
+
 INTERFACE_BASIC_INSTR_COMMIT;
 INTERFACE_ARCH_EVENT;
 INTERFACE_INSTR_COMMIT;
@@ -533,5 +566,7 @@ INTERFACE_ICACHE_READ;
 INTERFACE_ICACHE_REFILL;
 INTERFACE_ICACHE_REQ;
 INTERFACE_ICACHE_RESP;
+INTERFACE_ICACHE_IDEAL_REFILL;
+INTERFACE_ICACHE_IDEAL_READ;
 
 #endif

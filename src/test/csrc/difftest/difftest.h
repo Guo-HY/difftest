@@ -245,6 +245,8 @@ typedef struct {
   icache_sim_refill_event_t icache_sim_refill;
   icache_sim_req_event_t icache_sim_req;
   icache_sim_resp_event_t icache_sim_resp;
+  icache_sim_ideal_refill_t icache_sim_ideal_refill;
+  icache_sim_ideal_read_t icache_sim_ideal_read;
 } difftest_core_state_t;
 
 enum retire_inst_type {
@@ -417,6 +419,14 @@ public:
 
   inline icache_sim_resp_event_t* get_icache_sim_resp() {
     return &(dut.icache_sim_resp);
+  }
+
+  inline icache_sim_ideal_refill_t* get_icache_sim_ideal_refill() {
+    return &(dut.icache_sim_ideal_refill);
+  }
+
+  inline icache_sim_ideal_read_t* get_icache_sim_ideal_read() {
+    return &(dut.icache_sim_ideal_read);
   }
 
 #ifdef DEBUG_REFILL

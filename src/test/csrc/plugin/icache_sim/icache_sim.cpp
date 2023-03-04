@@ -80,10 +80,12 @@ int ICacheSim::doRead(icache_sim_read_event_t* readEvent)
 int ICacheSim::step()
 {
   cycle++;
+#ifdef ENABLE_PERF_COUNTER
   doRead(&(dut_ptr->icache_sim_read));
   metaArray->checkMultiHit(&(dut_ptr->icache_sim_refill));
   metaArray->doRefill(&(dut_ptr->icache_sim_refill));
   ipfBuffer->doRefill(&(dut_ptr->icache_sim_ipf_refill));
+#endif
   return 0;
 }
 
@@ -282,6 +284,41 @@ int icache_sim_clean_perf_info()
 {
   for (int i = 0; i < NUM_CORES; i++) {
     icacheSim[i]->clearPerfInfo();
+  }
+  return 0;
+}
+
+/* ideal cache */
+int ICacheSim::refillIdealCache(icache_sim_ideal_refill_t* event)
+{
+  if (!event->valid) return 0;
+  uint64_t alignPaddr = getAlignPaddrFromPaddr(event->paddr);
+  if (paddr2cacheline.count(alignPaddr) != 0) {
+    icachesim_info("refill ideal cache error:paddr 0x%lx already in\n", alignPaddr);
+  }
+  uint64_t* cacheline = (uint64_t*)malloc(sizeof(uint64_t) * CACHELINE_BEAT_NUM);
+  for (int i = 0; i < CACHELINE_BEAT_NUM; i++) {
+    cacheline[i] = event->data[i];
+  }
+  paddr2cacheline[alignPaddr] = cacheline;
+  return 0;
+}
+
+int ICacheSim::doReadIdealCache(icache_sim_ideal_read_t* event, int port)
+{
+  if (event->valid[port] == 0) {
+    event->port[port].isHit = 0;
+    return 0;
+  }
+  uint64_t alignPaddr = getAlignPaddrFromPaddr(event->paddr[port]);
+  if (paddr2cacheline.count(alignPaddr) == 0) {
+    event->port[port].isHit = 0;
+    return 0;
+  }
+  event->port[port].isHit = 1;
+  uint64_t* cacheline = paddr2cacheline[alignPaddr];
+  for (int i = 0; i < CACHELINE_BEAT_NUM; i++) {
+    event->port[port].hitData[i] = cacheline[i];
   }
   return 0;
 }

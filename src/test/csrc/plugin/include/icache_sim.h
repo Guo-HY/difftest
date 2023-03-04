@@ -7,16 +7,25 @@
 #include <unordered_map>
 #include <string>
 
+// #define ENABLE_PERF_COUNTER 1
+
 // TODO this is ugly
-#define SET_NUM 128
-#define PIDX_OFFSET_BITS 7
-#define PIDX_MASK 0x7f
+// #define SET_NUM 128
+// #define PIDX_OFFSET_BITS 7
+// #define PIDX_MASK 0x7f
+
+#define SET_NUM 64
+#define PIDX_OFFSET_BITS 6
+#define PIDX_MASK 0x3f
+
 #define WAY_NUM 8
 #define BLOCK_OFFSET_BITS 6
 
 #define ICACHE_READ_PORT_WIDTH 2
 
 #define IPF_BUFFER_ENTRY_NUM 64
+
+#define CACHELINE_BEAT_NUM 8
 
 class ICacheSim;
 class MetaArray;
@@ -64,6 +73,23 @@ typedef struct {
   }port[ICACHE_READ_PORT_WIDTH];
 } icache_sim_resp_event_t;
 
+typedef struct {
+  uint8_t valid;
+  uint64_t paddr;
+  uint64_t data[CACHELINE_BEAT_NUM];
+} icache_sim_ideal_refill_t;
+
+typedef struct {
+  /* input */
+  uint8_t valid[ICACHE_READ_PORT_WIDTH];
+  uint64_t paddr[ICACHE_READ_PORT_WIDTH];
+  /* output */
+  struct item {
+    uint8_t isHit;
+    uint64_t hitData[CACHELINE_BEAT_NUM];
+  }port[ICACHE_READ_PORT_WIDTH];
+} icache_sim_ideal_read_t;
+
 enum ICacheRefillMaster {
   MISSUNIT_IRM,
   IPF_IRM,
@@ -88,6 +114,11 @@ class ICacheSim {
   int clearPerfInfo();
 
   difftest_core_state_t* dut_ptr = NULL;
+
+  /* ideal cache */
+  std::unordered_map<uint64_t, u_int64_t*> paddr2cacheline;
+  int refillIdealCache(icache_sim_ideal_refill_t* event);
+  int doReadIdealCache(icache_sim_ideal_read_t* event, int index);
 
 };
 

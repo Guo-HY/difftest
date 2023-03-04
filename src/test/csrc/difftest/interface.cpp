@@ -477,3 +477,41 @@ INTERFACE_ICACHE_RESP {
     packet->port[index].vaddr = vaddr;
   }
 }
+// TODO remove data move
+INTERFACE_ICACHE_IDEAL_REFILL {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_ideal_refill();
+  packet->valid = valid;
+  if (valid) {
+    packet->paddr = paddr;
+    packet->data[0] = data_vec_0;
+    packet->data[1] = data_vec_1;
+    packet->data[2] = data_vec_2;
+    packet->data[3] = data_vec_3;
+    packet->data[4] = data_vec_4;
+    packet->data[5] = data_vec_5;
+    packet->data[6] = data_vec_6;
+    packet->data[7] = data_vec_7;
+  }
+}
+// TODO remove data move
+INTERFACE_ICACHE_IDEAL_READ {
+  if (icacheSim == NULL) return;
+  auto packet = difftest[coreid]->get_icache_sim_ideal_read();
+  packet->valid[index] = valid;
+  if (valid) {
+    packet->paddr[index] = paddr;
+    icacheSim[coreid]->doReadIdealCache(packet, index);
+    *hitInIdealCache = packet->port[index].isHit;
+    if (*hitInIdealCache) {
+      *hitData_0 = packet->port[index].hitData[0];
+      *hitData_1 = packet->port[index].hitData[1];
+      *hitData_2 = packet->port[index].hitData[2];
+      *hitData_3 = packet->port[index].hitData[3];
+      *hitData_4 = packet->port[index].hitData[4];
+      *hitData_5 = packet->port[index].hitData[5];
+      *hitData_6 = packet->port[index].hitData[6];
+      *hitData_7 = packet->port[index].hitData[7]; 
+    }
+  }
+}
