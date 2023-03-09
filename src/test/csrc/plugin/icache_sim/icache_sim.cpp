@@ -24,7 +24,7 @@ void printRefillTrace(icache_sim_refill_event_t* refillEvent)
   d->time, printRefillType(d->write_master), d->ptag, d->pidx, d->waymask);
 }
 
-u_int64_t getAlignPaddrFromPaddr(u_int64_t paddr)
+static u_int64_t getAlignPaddrFromPaddr(u_int64_t paddr)
 {
   return (paddr >> BLOCK_OFFSET_BITS) << BLOCK_OFFSET_BITS;
 }
@@ -82,6 +82,9 @@ int ICacheSim::step()
   cycle++;
 #ifdef ENABLE_IDEAL_ICACHE
   refillIdealCache(&(dut_ptr->icache_sim_ideal_refill));
+  for (int i = 0; i < 2; i++) {
+    // doReadIdealCache(&(dut_ptr->icache_sim_ideal_read), i);
+  }
 #endif
 #ifdef ENABLE_PERF_COUNTER
   doRead(&(dut_ptr->icache_sim_read));
@@ -297,13 +300,15 @@ int ICacheSim::refillIdealCache(icache_sim_ideal_refill_t* event)
   if (!event->valid) return 0;
   uint64_t alignPaddr = getAlignPaddrFromPaddr(event->paddr);
   if (paddr2cacheline.count(alignPaddr) != 0) {
-    icachesim_info("refill ideal cache error:paddr 0x%lx already in\n", alignPaddr);
+    icachesim_info("{%ld} refill ideal cache error:paddr 0x%lx already in\n",cycle, alignPaddr);
   }
   uint64_t* cacheline = (uint64_t*)malloc(sizeof(uint64_t) * CACHELINE_BEAT_NUM);
   for (int i = 0; i < CACHELINE_BEAT_NUM; i++) {
     cacheline[i] = event->data[i];
   }
   paddr2cacheline[alignPaddr] = cacheline;
+  printf("sim:{%ld} refill:paddr=0x%lx,align=0x%lx,data=0x%lx%lx%lx%lx%lx%lx%lx%lx\n",cycle, event->paddr,alignPaddr,
+  cacheline[0],cacheline[1],cacheline[2],cacheline[3],cacheline[4],cacheline[5],cacheline[6],cacheline[7]);
   return 0;
 }
 
@@ -323,5 +328,7 @@ int ICacheSim::doReadIdealCache(icache_sim_ideal_read_t* event, int port)
   for (int i = 0; i < CACHELINE_BEAT_NUM; i++) {
     event->port[port].hitData[i] = cacheline[i];
   }
+  printf("sim:{%ld} readhit:port=%d,paddr=0x%lx,align=0x%lx,data=0x%lx%lx%lx%lx%lx%lx%lx%lx\n",cycle,port, event->paddr[port],alignPaddr,
+  cacheline[0],cacheline[1],cacheline[2],cacheline[3],cacheline[4],cacheline[5],cacheline[6],cacheline[7]);
   return 0;
 }

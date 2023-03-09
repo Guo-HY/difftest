@@ -499,19 +499,16 @@ INTERFACE_ICACHE_IDEAL_READ {
   if (icacheSim == NULL) return;
   auto packet = difftest[coreid]->get_icache_sim_ideal_read();
   packet->valid[index] = valid;
-  if (valid) {
-    packet->paddr[index] = paddr;
-    icacheSim[coreid]->doReadIdealCache(packet, index);
-    *hitInIdealCache = packet->port[index].isHit;
-    if (*hitInIdealCache) {
-      *hitData_0 = packet->port[index].hitData[0];
-      *hitData_1 = packet->port[index].hitData[1];
-      *hitData_2 = packet->port[index].hitData[2];
-      *hitData_3 = packet->port[index].hitData[3];
-      *hitData_4 = packet->port[index].hitData[4];
-      *hitData_5 = packet->port[index].hitData[5];
-      *hitData_6 = packet->port[index].hitData[6];
-      *hitData_7 = packet->port[index].hitData[7]; 
-    }
-  }
+  packet->paddr[index] = paddr;
+
+  // icacheSim[coreid]->doReadIdealCache(packet, index);
+  *hitInIdealCache = packet->port[index].isHit;
+  *hitData_0 = packet->port[index].hitData[0];
+  *hitData_1 = packet->port[index].hitData[1];
+  *hitData_2 = packet->port[index].hitData[2];
+  *hitData_3 = packet->port[index].hitData[3];
+  *hitData_4 = packet->port[index].hitData[4];
+  *hitData_5 = packet->port[index].hitData[5];
+  *hitData_6 = packet->port[index].hitData[6];
+  *hitData_7 = packet->port[index].hitData[7]; 
 }
