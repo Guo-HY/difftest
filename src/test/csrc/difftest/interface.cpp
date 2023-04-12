@@ -436,3 +436,71 @@ INTERFACE_RUNAHEAD_MEMDEP_PRED {
   }
   *oracle_vaddr = packet->oracle_vaddr;
 }
+
+typedef struct {
+  bool valid;
+  uint32_t phytag;
+  uint64_t refill_time;
+} icache_meta_array_item;
+
+static icache_meta_array_item icache_meta_array[8][256]; // way = 8, set = 256 for max
+static icache_meta_array_item icache_read_ways[8];
+
+static void icache_meta_print(int idx, uint64_t timer, int index) {
+  printf("icache meta diff fail at time=%ld,set idx=%d,index=%d:\ngolden meta array:\n", timer, idx, index);
+  for (int i = 0; i < 8; i++) {
+    printf("way=%d,valid=%d,phytag=0x%x,refill_time=%ld\n", i,
+    icache_meta_array[i][idx].valid, icache_meta_array[i][idx].phytag,
+    icache_meta_array[i][idx].refill_time);
+  }
+  printf("read is:\n");
+  for (int i = 0; i < 8; i++) {
+    printf("way=%d,valid=%d,phytag=0x%x\n", i,
+    icache_read_ways[i].valid, icache_read_ways[i].phytag);
+  }
+}
+
+
+INTERFACE_ICACHE_META_WRITE {
+  if (!valid) {
+    return;
+  }
+  // printf("INTERFACE_ICACHE_BANKED_META_READ really do refill");
+  icache_meta_array[wayNum][virIdx].valid = true;
+  icache_meta_array[wayNum][virIdx].phytag = phyTag;
+  icache_meta_array[wayNum][virIdx].refill_time = timer;
+}
+
+INTERFACE_ICACHE_BANKED_META_READ {
+  if (!valid) {
+    return;
+  }
+  // printf("INTERFACE_ICACHE_BANKED_META_READ really do check");
+  icache_read_ways[0].valid = entryValid_0;
+  icache_read_ways[1].valid = entryValid_1;
+  icache_read_ways[2].valid = entryValid_2;
+  icache_read_ways[3].valid = entryValid_3;
+  icache_read_ways[4].valid = entryValid_4;
+  icache_read_ways[5].valid = entryValid_5;
+  icache_read_ways[6].valid = entryValid_6;
+  icache_read_ways[7].valid = entryValid_7;
+  icache_read_ways[0].phytag = metaData_0;
+  icache_read_ways[1].phytag = metaData_1;
+  icache_read_ways[2].phytag = metaData_2;
+  icache_read_ways[3].phytag = metaData_3;
+  icache_read_ways[4].phytag = metaData_4;
+  icache_read_ways[5].phytag = metaData_5;
+  icache_read_ways[6].phytag = metaData_6;
+  icache_read_ways[7].phytag = metaData_7;
+  for (int i = 0; i < 8; i++) {
+    if (icache_read_ways[i].valid ^ icache_meta_array[i][idx].valid) {
+      icache_meta_print(idx, timer, index);
+      return;
+    }
+    if (icache_read_ways[i].valid && 
+    icache_read_ways[i].phytag != icache_meta_array[i][idx].phytag) {
+      icache_meta_print(idx, timer, index);
+      return;
+    }
+  }
+}

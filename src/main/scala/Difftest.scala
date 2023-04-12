@@ -220,6 +220,22 @@ class DiffRunaheadMemdepPredIO extends DifftestBundle with DifftestWithIndex {
   val oracle_vaddr  = Output(UInt(64.W))
 }
 
+class DiffICacheMetaWriteIO extends DifftestBundle with DifftestWithIndex {
+  val valid = Input(Bool())
+  val virIdx  = Input(UInt(32.W))
+  val phyTag  = Input(UInt(32.W))
+  val wayNum = Input(UInt(8.W))
+  val timer = Input(UInt(64.W))
+}
+
+class DiffICacheBankedMetaReadIO extends DifftestBundle with DifftestWithIndex {
+  val valid = Input(Bool())
+  val idx = Input(UInt(32.W))
+  val entryValid = Input(Vec(8, Bool()))
+  val metaData = Input(Vec(8, UInt(32.W)))
+  val timer = Input(UInt(64.W))
+}
+
 abstract class DifftestModule[T <: DifftestBundle] extends ExtModule with HasExtModuleInline
 {
   val io: T
@@ -316,6 +332,8 @@ class DifftestRunaheadEvent extends DifftestBaseModule(new DiffRunaheadEventIO)
 class DifftestRunaheadCommitEvent extends DifftestBaseModule(new DiffRunaheadCommitEventIO)
 class DifftestRunaheadRedirectEvent extends DifftestBaseModule(new DiffRunaheadRedirectEventIO)
 class DifftestRunaheadMemdepPred extends DifftestBaseModule(new DiffRunaheadMemdepPredIO)
+class DifftestICacheMetaWrite extends DifftestBaseModule(new DiffICacheMetaWriteIO)
+class DifftestICacheBankedMetaRead extends DifftestBaseModule(new DiffICacheBankedMetaReadIO)
 
 // Difftest emulator top
 

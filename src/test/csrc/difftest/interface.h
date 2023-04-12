@@ -469,6 +469,42 @@ extern "C" int v_difftest_step();
     DPIC_ARG_LONG pc,                              \
     uint64_t* oracle_vaddr                         \
   )
+  
+#define INTERFACE_ICACHE_BANKED_META_READ         \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheBankedMetaRead)(  \
+    DPIC_ARG_BYTE coreid,                          \
+    DPIC_ARG_BYTE index,                           \
+    DPIC_ARG_BIT  valid,                          \
+    DPIC_ARG_INT  idx,                            \
+    DPIC_ARG_BIT  entryValid_0,                   \
+    DPIC_ARG_BIT  entryValid_1,                   \
+    DPIC_ARG_BIT  entryValid_2,                   \
+    DPIC_ARG_BIT  entryValid_3,                   \
+    DPIC_ARG_BIT  entryValid_4,                   \
+    DPIC_ARG_BIT  entryValid_5,                   \
+    DPIC_ARG_BIT  entryValid_6,                   \
+    DPIC_ARG_BIT  entryValid_7,                   \
+    DPIC_ARG_INT  metaData_0,                     \
+    DPIC_ARG_INT  metaData_1,                     \
+    DPIC_ARG_INT  metaData_2,                     \
+    DPIC_ARG_INT  metaData_3,                     \
+    DPIC_ARG_INT  metaData_4,                     \
+    DPIC_ARG_INT  metaData_5,                     \
+    DPIC_ARG_INT  metaData_6,                     \
+    DPIC_ARG_INT  metaData_7,                     \
+    DPIC_ARG_LONG timer                           \
+    )
+  
+#define INTERFACE_ICACHE_META_WRITE               \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheMetaWrite)(       \
+    DPIC_ARG_BYTE coreid,                          \
+    DPIC_ARG_BYTE index,                           \
+    DPIC_ARG_BIT  valid,                          \
+    DPIC_ARG_INT  virIdx,                         \
+    DPIC_ARG_INT  phyTag,                         \
+    DPIC_ARG_BYTE wayNum,                         \
+    DPIC_ARG_LONG timer                           \
+  )
 
 INTERFACE_BASIC_INSTR_COMMIT;
 INTERFACE_ARCH_EVENT;
@@ -492,5 +528,7 @@ INTERFACE_RUNAHEAD_EVENT;
 INTERFACE_RUNAHEAD_COMMIT_EVENT;
 INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
+INTERFACE_ICACHE_BANKED_META_READ;
+INTERFACE_ICACHE_META_WRITE;
 
 #endif
