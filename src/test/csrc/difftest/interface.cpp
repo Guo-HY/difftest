@@ -493,12 +493,16 @@ INTERFACE_ICACHE_BANKED_META_READ {
   icache_read_ways[6].phytag = metaData_6;
   icache_read_ways[7].phytag = metaData_7;
   for (int i = 0; i < 8; i++) {
-    if (icache_read_ways[i].valid ^ icache_meta_array[i][idx].valid) {
+    if (icache_read_ways[i].valid ^ icache_meta_array[i][idx].valid
+      && timer != icache_meta_array[i][idx].refill_time
+    ) {
       icache_meta_print(idx, timer, index);
       return;
     }
     if (icache_read_ways[i].valid && 
-    icache_read_ways[i].phytag != icache_meta_array[i][idx].phytag) {
+        icache_read_ways[i].phytag != icache_meta_array[i][idx].phytag
+        && timer != icache_meta_array[i][idx].refill_time
+    ) {
       icache_meta_print(idx, timer, index);
       return;
     }
