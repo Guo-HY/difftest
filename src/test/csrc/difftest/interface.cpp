@@ -508,3 +508,132 @@ INTERFACE_ICACHE_BANKED_META_READ {
     }
   }
 }
+
+typedef struct {
+  bool valid;
+  uint64_t data[8];
+  uint64_t refill_time;
+} icache_data_array_item;
+
+static icache_data_array_item icache_data_array[8][256]; // way = 8, set = 256 for max
+static icache_data_array_item icache_data_read;
+INTERFACE_ICACHE_BANKED_DATA_WRITE {
+  if (!valid) { return; }
+  // printf("icache data array refill!\n");
+  icache_data_array[wayNum][idx].data[0] = data_0;
+  icache_data_array[wayNum][idx].data[1] = data_1;
+  icache_data_array[wayNum][idx].data[2] = data_2;
+  icache_data_array[wayNum][idx].data[3] = data_3;
+  icache_data_array[wayNum][idx].data[4] = data_4;
+  icache_data_array[wayNum][idx].data[5] = data_5;
+  icache_data_array[wayNum][idx].data[6] = data_6;
+  icache_data_array[wayNum][idx].data[7] = data_7;
+  icache_data_array[wayNum][idx].valid = true;
+  icache_data_array[wayNum][idx].refill_time = timer;
+}
+
+static void icache_data_print(uint32_t idx, uint64_t timer,uint8_t wayNum, uint8_t index) {
+  printf("icache data diff fail at time=%ld,set idx=%d,wayNum=%d,index=%d:\n", 
+    timer, idx, wayNum, index);
+  icache_data_array_item* ref = &(icache_data_array[wayNum][idx]);
+  icache_data_array_item* dut = &icache_data_read;
+  printf("golden:valid=%d,refilltime=%ld,data=0x", ref->valid, ref->refill_time);
+  for (int i = 7; i >= 0; i--) {
+    printf("%lx", ref->data[i]);
+  }
+  printf("\nread:valid=%d,refilltime=%ld,data=0x", dut->valid, dut->refill_time);
+  for (int i = 7; i >= 0; i--) {
+    printf("%lx", dut->data[i]);
+  }
+  printf("\n");
+}
+
+INTERFACE_ICACHE_BANKED_DATA_READ {
+  if (!valid) { return; }
+  // printf("in INTERFACE_ICACHE_BANKED_DATA_READ\n");
+  icache_data_array_item* ref = &(icache_data_array[wayNum][idx]);
+  icache_data_array_item* dut = &icache_data_read;
+  dut->valid = ref->valid;
+  dut->refill_time = timer;
+  dut->data[0] = data_0;
+  dut->data[1] = data_1;
+  dut->data[2] = data_2;
+  dut->data[3] = data_3;
+  dut->data[4] = data_4;
+  dut->data[5] = data_5;
+  dut->data[6] = data_6;
+  dut->data[7] = data_7;
+  if ((ref->valid ^ dut->valid) && timer != ref->refill_time) {
+    icache_data_print(idx, timer, wayNum, index);
+    return;
+  }
+  if (!ref->valid) {
+    return;
+  }
+  for (int i = 0; i < 8; i++) {
+    if (dut->data[i] != ref->data[i]) {
+      if (timer != ref->refill_time) {
+        icache_data_print(idx, timer, wayNum, index);
+        return;
+      }
+    }
+  }
+}
+
+typedef struct {
+  uint64_t req_recv_time;
+  uint64_t req_vaddr;
+}icache_req_item;
+
+#include <list>
+static bool enable_icache_req_diff = true;
+static std::list<icache_req_item*> icache_req_queue;
+
+INTERFACE_ICACHE_REQ {
+  if (!valid_0 || !enable_icache_req_diff) { return; }
+  // printf("in INTERFACE_ICACHE_REQ\n");
+  icache_req_item* item;
+  if (index == 0) { // deal req
+    item = new icache_req_item;
+    item->req_vaddr = vaddr_0;
+    item->req_recv_time = timer;
+    icache_req_queue.push_back(item);
+    if (valid_1) {
+      item = new icache_req_item;
+      item->req_vaddr = vaddr_1;
+      item->req_recv_time = timer;
+      icache_req_queue.push_back(item);
+    }
+    return;
+  } 
+  if (index == 1) { // deal resp
+    if (icache_req_queue.empty()) {
+      printf("icache req fail:icache_req_queue is empty,went out:timer=%ld,vaddr=0x%lx\n", timer, vaddr_0);
+      enable_icache_req_diff = false;
+      return;
+    }
+    icache_req_item* last = icache_req_queue.front();
+    if (last->req_vaddr != vaddr_0) {
+      printf("icache req fail:icache_req_queue head:timer=%ld,vaddr=0x%lx ,went out:timer=%ld,vaddr=0x%lx\n",
+        last->req_recv_time,last->req_vaddr, timer, vaddr_0);
+      enable_icache_req_diff = false;
+      return;
+    }
+    icache_req_queue.pop_front();
+    if (valid_1) {
+      if (icache_req_queue.empty()) {
+        printf("icache req fail:icache_req_queue is empty,went out:timer=%ld,vaddr=0x%lx\n", timer, vaddr_1);
+        enable_icache_req_diff = false;
+        return;
+      }
+      icache_req_item* last = icache_req_queue.front();
+      if (last->req_vaddr != vaddr_1) {
+        printf("icache req fail:icache_req_queue head:timer=%ld,vaddr=0x%lx ,went out:timer=%ld,vaddr=0x%lx\n",
+          last->req_recv_time,last->req_vaddr, timer, vaddr_1);
+        enable_icache_req_diff = false;
+        return;
+      }
+      icache_req_queue.pop_front();
+    }
+  }
+}

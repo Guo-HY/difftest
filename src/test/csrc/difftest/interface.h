@@ -506,6 +506,55 @@ extern "C" int v_difftest_step();
     DPIC_ARG_LONG timer                           \
   )
 
+#define INTERFACE_ICACHE_BANKED_DATA_WRITE        \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheBankedDataWrite)( \
+    DPIC_ARG_BYTE coreid,                         \
+    DPIC_ARG_BYTE index,                          \
+    DPIC_ARG_BIT  valid,                          \
+    DPIC_ARG_INT  idx,                            \
+    DPIC_ARG_BYTE wayNum,                         \
+    DPIC_ARG_LONG data_0,                         \
+    DPIC_ARG_LONG data_1,                         \
+    DPIC_ARG_LONG data_2,                         \
+    DPIC_ARG_LONG data_3,                         \
+    DPIC_ARG_LONG data_4,                         \
+    DPIC_ARG_LONG data_5,                         \
+    DPIC_ARG_LONG data_6,                         \
+    DPIC_ARG_LONG data_7,                         \
+    DPIC_ARG_LONG timer                           \
+  )
+
+#define INTERFACE_ICACHE_BANKED_DATA_READ         \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheBankedDataRead)(  \
+    DPIC_ARG_BYTE coreid,                         \
+    DPIC_ARG_BYTE index,                          \
+    DPIC_ARG_BIT  valid,                          \
+    DPIC_ARG_INT  idx,                            \
+    DPIC_ARG_BYTE wayNum,                         \
+    DPIC_ARG_BYTE entryValid,                     \
+    DPIC_ARG_LONG data_0,                         \
+    DPIC_ARG_LONG data_1,                         \
+    DPIC_ARG_LONG data_2,                         \
+    DPIC_ARG_LONG data_3,                         \
+    DPIC_ARG_LONG data_4,                         \
+    DPIC_ARG_LONG data_5,                         \
+    DPIC_ARG_LONG data_6,                         \
+    DPIC_ARG_LONG data_7,                         \
+    DPIC_ARG_LONG timer                           \
+  )
+
+#define INTERFACE_ICACHE_REQ                      \
+  DIFFTEST_DPIC_FUNC_DECL(ICacheReq)(             \
+    DPIC_ARG_BYTE coreid,                         \
+    DPIC_ARG_BYTE index,                          \
+    DPIC_ARG_BIT  valid_0,                        \
+    DPIC_ARG_LONG vaddr_0,                        \
+    DPIC_ARG_BIT  valid_1,                        \
+    DPIC_ARG_LONG vaddr_1,                        \
+    DPIC_ARG_LONG timer                           \    
+  )
+
+
 INTERFACE_BASIC_INSTR_COMMIT;
 INTERFACE_ARCH_EVENT;
 INTERFACE_INSTR_COMMIT;
@@ -530,5 +579,8 @@ INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
 INTERFACE_ICACHE_BANKED_META_READ;
 INTERFACE_ICACHE_META_WRITE;
+INTERFACE_ICACHE_BANKED_DATA_WRITE;
+INTERFACE_ICACHE_BANKED_DATA_READ;
+INTERFACE_ICACHE_REQ;
 
 #endif

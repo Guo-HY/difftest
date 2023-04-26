@@ -236,6 +236,31 @@ class DiffICacheBankedMetaReadIO extends DifftestBundle with DifftestWithIndex {
   val timer = Input(UInt(64.W))
 }
 
+class DiffICacheBankedDataWriteIO extends DifftestBundle with DifftestWithIndex {
+  val valid = Input(Bool())
+  val idx = Input(UInt(32.W))
+  val wayNum = Input(UInt(8.W))
+  val data = Input(Vec(8, UInt(64.W)))
+  val timer = Input(UInt(64.W))
+}
+
+class DiffICacheBankedDataReadIO extends DifftestBundle with DifftestWithIndex {
+  val valid = Input(Bool())
+  val idx = Input(UInt(32.W))
+  val wayNum = Input(UInt(8.W))
+  val entryValid = Input(Bool())
+  val data = Input(Vec(8, UInt(64.W)))
+  val timer = Input(UInt(64.W))
+}
+
+class DiffICacheReqIO extends DifftestBundle with DifftestWithIndex {
+  val valid_0 = Input(Bool())
+  val vaddr_0 = Input(UInt(64.W))
+  val valid_1 = Input(Bool())
+  val vaddr_1 = Input(UInt(64.W))
+  val timer = Input(UInt(64.W))
+}
+
 abstract class DifftestModule[T <: DifftestBundle] extends ExtModule with HasExtModuleInline
 {
   val io: T
@@ -334,7 +359,9 @@ class DifftestRunaheadRedirectEvent extends DifftestBaseModule(new DiffRunaheadR
 class DifftestRunaheadMemdepPred extends DifftestBaseModule(new DiffRunaheadMemdepPredIO)
 class DifftestICacheMetaWrite extends DifftestBaseModule(new DiffICacheMetaWriteIO)
 class DifftestICacheBankedMetaRead extends DifftestBaseModule(new DiffICacheBankedMetaReadIO)
-
+class DifftestICacheBankedDataWrite extends DifftestBaseModule(new DiffICacheBankedDataWriteIO)
+class DifftestICacheBankedDataRead extends DifftestBaseModule(new DiffICacheBankedDataReadIO)
+class DifftestICacheReq extends DifftestBaseModule(new DiffICacheReqIO)
 // Difftest emulator top
 
 // XiangShan log / perf ctrl, should be inited in SimTop IO
