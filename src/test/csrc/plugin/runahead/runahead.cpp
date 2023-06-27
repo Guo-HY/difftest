@@ -224,21 +224,22 @@ void Runahead::update_debug_info(void* dest_buffer) {
 }
 
 void Runahead::do_first_instr_runahead() {
-  if (!has_commit && dut_ptr->runahead[0].valid && dut_ptr->runahead[0].pc == FIRST_INST_ADDRESS) {
-    runahead_debug("The first instruction of core %d start to run ahead.\n", id);
-    has_commit = 1;
-    // nemu_this_pc = dut_ptr->runahead[0].pc;
+  panic("la32r diff not support runahead");
+  // if (!has_commit && dut_ptr->runahead[0].valid && dut_ptr->runahead[0].pc == FIRST_INST_ADDRESS) {
+  //   runahead_debug("The first instruction of core %d start to run ahead.\n", id);
+  //   has_commit = 1;
+  //   // nemu_this_pc = dut_ptr->runahead[0].pc;
 
-    proxy->memcpy(0x80000000, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
-    // Manually setup simulator init regs,
-    // for at this time, the first has not been initialied
-    dut_ptr->csr.this_pc = FIRST_INST_ADDRESS; 
-    proxy->regcpy(&dut_ptr->regs, DIFFTEST_TO_REF);
-    DynamicSimulatorConfig nemu_config;
-    nemu_config.ignore_illegal_mem_access = true;
-    proxy->update_config(&nemu_config);
-    init_runahead_slave();
-  }
+  //   proxy->memcpy(0x80000000, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
+  //   // Manually setup simulator init regs,
+  //   // for at this time, the first has not been initialied
+  //   dut_ptr->csr.this_pc = FIRST_INST_ADDRESS; 
+  //   proxy->regcpy(&dut_ptr->regs, DIFFTEST_TO_REF);
+  //   DynamicSimulatorConfig nemu_config;
+  //   nemu_config.ignore_illegal_mem_access = true;
+  //   proxy->update_config(&nemu_config);
+  //   init_runahead_slave();
+  // }
 }
 
 #ifdef QUERY_MEM_ACCESS

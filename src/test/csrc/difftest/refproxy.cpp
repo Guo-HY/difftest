@@ -52,145 +52,133 @@ NemuProxy::NemuProxy(int coreid) {
     printf("%s\n", dlerror());
     assert(0);
   }
+    this->memcpy = (void (*)(paddr_t, void*, size_t, bool))dlsym(
+            handle, "difftest_memcpy");
+    check_and_assert(this->memcpy);
 
-  this->memcpy = (void (*)(paddr_t, void *, size_t, bool))dlsym(handle, "difftest_memcpy");
-  check_and_assert(this->memcpy);
+    regcpy = (void (*)(void*, bool, bool))dlsym(handle, "difftest_regcpy");
+    check_and_assert(regcpy);
 
-  regcpy = (void (*)(void *, bool))dlsym(handle, "difftest_regcpy");
-  check_and_assert(regcpy);
+    csrcpy = (void (*)(void*, bool))dlsym(handle, "difftest_csrcpy");
+    check_and_assert(csrcpy);
 
-  csrcpy = (void (*)(void *, bool))dlsym(handle, "difftest_csrcpy");
-  check_and_assert(csrcpy);
+    uarchstatus_cpy = (void (*)(void*, bool))dlsym(handle, "difftest_uarchstatus_cpy");
+    check_and_assert(uarchstatus_cpy);
 
-  uarchstatus_cpy = (void (*)(void *, bool))dlsym(handle, "difftest_uarchstatus_cpy");
-  check_and_assert(uarchstatus_cpy);
+    exec = (void (*)(uint64_t))dlsym(handle, "difftest_exec");
+    check_and_assert(exec);
 
-  exec = (void (*)(uint64_t))dlsym(handle, "difftest_exec");
-  check_and_assert(exec);
+    check_end = (int(*)(void))dlsym(handle, "difftest_cosim_end");
+    check_and_assert(check_end);
 
-  guided_exec = (vaddr_t (*)(void *))dlsym(handle, "difftest_guided_exec");
-  check_and_assert(guided_exec);
+    guided_exec = (vaddr_t(*)(void*))dlsym(handle, "difftest_guided_exec");
+    check_and_assert(guided_exec);
 
-  update_config = (vaddr_t (*)(void *))dlsym(handle, "update_dynamic_config");
-  check_and_assert(update_config);
+    store_commit = (int (*)(uint64_t, uint64_t))dlsym(handle, "difftest_store_commit");
+    check_and_assert(store_commit);
 
-  store_commit = (int (*)(uint64_t*, uint64_t*, uint8_t*))dlsym(handle, "difftest_store_commit");
-  check_and_assert(store_commit);
+    raise_intr = (void (*)(uint64_t))dlsym(handle, "difftest_raise_intr");
+    check_and_assert(raise_intr);
 
-  raise_intr = (void (*)(uint64_t))dlsym(handle, "difftest_raise_intr");
-  check_and_assert(raise_intr);
+    isa_reg_display = (void (*)(void))dlsym(handle, "isa_reg_display");
+    check_and_assert(isa_reg_display);
 
-  isa_reg_display = (void (*)(void))dlsym(handle, "isa_reg_display");
-  check_and_assert(isa_reg_display);
+    tlbfill_index_set = (void (*)(uint32_t))dlsym(handle, "difftest_tlbfill_index_set");
+    check_and_assert(tlbfill_index_set);
 
-  load_flash_bin = (void (*)(void *flash_bin, size_t size))dlsym(handle, "difftest_load_flash");
-  check_and_assert(load_flash_bin);
+    timercpy = (void (*)(void*))dlsym(handle, "difftest_timercpy");
+    check_and_assert(timercpy);
 
-  query = (void (*)(void*, uint64_t))dlsym(handle, "difftest_query_ref");
-#ifdef ENABLE_RUNHEAD
-  check_and_assert(query);
-#endif
+    estat_sync = (void (*)(uint32_t, uint32_t))dlsym(handle, "difftest_estat_sync");
+    check_and_assert(estat_sync);
 
-  auto nemu_difftest_set_mhartid = (void (*)(int))dlsym(handle, "difftest_set_mhartid");
-  if (NUM_CORES > 1) {
-    check_and_assert(nemu_difftest_set_mhartid);
-    nemu_difftest_set_mhartid(coreid);
-  }
+    auto nemu_init = (void (*)(void))dlsym(handle, "difftest_init");
+    check_and_assert(nemu_init);
 
-  auto nemu_misc_put_gmaddr = (void (*)(void*))dlsym(handle, "difftest_put_gmaddr");
-  if (NUM_CORES > 1) {
-    check_and_assert(nemu_misc_put_gmaddr);
-    assert(goldenMem);
-    nemu_misc_put_gmaddr(goldenMem);
-  }
-
-  auto nemu_init = (void (*)(void))dlsym(handle, "difftest_init");
-  check_and_assert(nemu_init);
-
-  nemu_init();
+    nemu_init();
 }
 
 void ref_misc_put_gmaddr(uint8_t* ptr) {
   goldenMem = ptr;
 }
 
-SpikeProxy::SpikeProxy(int coreid) {
-  if (difftest_ref_so == NULL) {
-    printf("--diff is not given, "
-        "try to use $(" SPIKE_ENV_VARIABLE ")/" SPIKE_SO_FILENAME " by default\n");
-    const char *spike_home = getenv(SPIKE_ENV_VARIABLE);
-    if (spike_home == NULL) {
-      printf("FATAL: $(" SPIKE_ENV_VARIABLE ") is not defined!\n");
-      exit(1);
-    }
-    const char *so = "/" SPIKE_SO_FILENAME;
-    char *buf = (char *)malloc(strlen(spike_home) + strlen(so) + 1);
-    strcpy(buf, spike_home);
-    strcat(buf, so);
-    difftest_ref_so = buf;
-  }
+// SpikeProxy::SpikeProxy(int coreid) {
+//   if (difftest_ref_so == NULL) {
+//     printf("--diff is not given, "
+//         "try to use $(" SPIKE_ENV_VARIABLE ")/" SPIKE_SO_FILENAME " by default\n");
+//     const char *spike_home = getenv(SPIKE_ENV_VARIABLE);
+//     if (spike_home == NULL) {
+//       printf("FATAL: $(" SPIKE_ENV_VARIABLE ") is not defined!\n");
+//       exit(1);
+//     }
+//     const char *so = "/" SPIKE_SO_FILENAME;
+//     char *buf = (char *)malloc(strlen(spike_home) + strlen(so) + 1);
+//     strcpy(buf, spike_home);
+//     strcat(buf, so);
+//     difftest_ref_so = buf;
+//   }
 
-  printf("SpikeProxy using %s\n", difftest_ref_so);
+//   printf("SpikeProxy using %s\n", difftest_ref_so);
 
-  void *handle = dlmopen(LM_ID_NEWLM, difftest_ref_so, RTLD_LAZY | RTLD_DEEPBIND);
-  if (!handle) {
-    printf("%s\n", dlerror());
-    assert(0);
-  }
+//   void *handle = dlmopen(LM_ID_NEWLM, difftest_ref_so, RTLD_LAZY | RTLD_DEEPBIND);
+//   if (!handle) {
+//     printf("%s\n", dlerror());
+//     assert(0);
+//   }
 
-  auto spike_init = (void (*)(int))dlsym(handle, "difftest_init");
-  check_and_assert(spike_init);
+//   auto spike_init = (void (*)(int))dlsym(handle, "difftest_init");
+//   check_and_assert(spike_init);
 
-  this->memcpy = (void (*)(paddr_t, void *, size_t, bool))dlsym(handle, "difftest_memcpy");
-  check_and_assert(this->memcpy);
+//   this->memcpy = (void (*)(paddr_t, void *, size_t, bool))dlsym(handle, "difftest_memcpy");
+//   check_and_assert(this->memcpy);
 
-  regcpy = (void (*)(void *, bool))dlsym(handle, "difftest_regcpy");
-  check_and_assert(regcpy);
+//   regcpy = (void (*)(void *, bool))dlsym(handle, "difftest_regcpy");
+//   check_and_assert(regcpy);
 
-  csrcpy = (void (*)(void *, bool))dlsym(handle, "isa_reg_display");
-  check_and_assert(csrcpy);
+//   csrcpy = (void (*)(void *, bool))dlsym(handle, "isa_reg_display");
+//   check_and_assert(csrcpy);
 
-  uarchstatus_cpy = (void (*)(void *, bool))dlsym(handle, "isa_reg_display");
-  check_and_assert(uarchstatus_cpy);
+//   uarchstatus_cpy = (void (*)(void *, bool))dlsym(handle, "isa_reg_display");
+//   check_and_assert(uarchstatus_cpy);
 
-  exec = (void (*)(uint64_t))dlsym(handle, "difftest_exec");
-  check_and_assert(exec);
+//   exec = (void (*)(uint64_t))dlsym(handle, "difftest_exec");
+//   check_and_assert(exec);
 
-  guided_exec = (vaddr_t (*)(void *))dlsym(handle, "difftest_guided_exec");
-  check_and_assert(guided_exec);
+//   guided_exec = (vaddr_t (*)(void *))dlsym(handle, "difftest_guided_exec");
+//   check_and_assert(guided_exec);
 
-  update_config = (vaddr_t (*)(void *))dlsym(handle, "isa_reg_display");
-  check_and_assert(update_config);
+//   update_config = (vaddr_t (*)(void *))dlsym(handle, "isa_reg_display");
+//   check_and_assert(update_config);
 
-  store_commit = (int (*)(uint64_t*, uint64_t*, uint8_t*))dlsym(handle, "difftest_store_commit");
-  check_and_assert(store_commit);
+//   store_commit = (int (*)(uint64_t*, uint64_t*, uint8_t*))dlsym(handle, "difftest_store_commit");
+//   check_and_assert(store_commit);
 
-  raise_intr = (void (*)(uint64_t))dlsym(handle, "difftest_raise_intr");
-  check_and_assert(raise_intr);
+//   raise_intr = (void (*)(uint64_t))dlsym(handle, "difftest_raise_intr");
+//   check_and_assert(raise_intr);
 
-  isa_reg_display = (void (*)(void))dlsym(handle, "isa_reg_display");
-  check_and_assert(isa_reg_display);
+//   isa_reg_display = (void (*)(void))dlsym(handle, "isa_reg_display");
+//   check_and_assert(isa_reg_display);
 
-  debug_mem_sync = (void (*)(paddr_t, void *, size_t))dlsym(handle, "debug_mem_sync");
-  check_and_assert(debug_mem_sync);
+//   debug_mem_sync = (void (*)(paddr_t, void *, size_t))dlsym(handle, "debug_mem_sync");
+//   check_and_assert(debug_mem_sync);
 
-  query = (void (*)(void*, uint64_t))dlsym(handle, "difftest_query_ref");
-#ifdef ENABLE_RUNHEAD
-  check_and_assert(query);
-#endif
+//   query = (void (*)(void*, uint64_t))dlsym(handle, "difftest_query_ref");
+// #ifdef ENABLE_RUNHEAD
+//   check_and_assert(query);
+// #endif
 
-  auto spike_difftest_set_mhartid = (void (*)(int))dlsym(handle, "difftest_set_mhartid");
-  if (NUM_CORES > 1) {
-    check_and_assert(spike_difftest_set_mhartid);
-    spike_difftest_set_mhartid(coreid);
-  }
+//   auto spike_difftest_set_mhartid = (void (*)(int))dlsym(handle, "difftest_set_mhartid");
+//   if (NUM_CORES > 1) {
+//     check_and_assert(spike_difftest_set_mhartid);
+//     spike_difftest_set_mhartid(coreid);
+//   }
 
-  auto spike_misc_put_gmaddr = (void (*)(void*))dlsym(handle, "difftest_put_gmaddr");
-  if (NUM_CORES > 1) {
-    check_and_assert(spike_misc_put_gmaddr);
-    assert(goldenMem);
-    spike_misc_put_gmaddr(goldenMem);
-  }
+//   auto spike_misc_put_gmaddr = (void (*)(void*))dlsym(handle, "difftest_put_gmaddr");
+//   if (NUM_CORES > 1) {
+//     check_and_assert(spike_misc_put_gmaddr);
+//     assert(goldenMem);
+//     spike_misc_put_gmaddr(goldenMem);
+//   }
 
-  spike_init(0);
-}
+//   spike_init(0);
+// }

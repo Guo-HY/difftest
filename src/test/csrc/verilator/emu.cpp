@@ -56,6 +56,7 @@ static inline void print_help(const char *file) {
   printf("  -i, --image=FILE           run with this image file\n");
   printf("  -b, --log-begin=NUM        display log from NUM th cycle\n");
   printf("  -e, --log-end=NUM          stop display log at NUM th cycle\n");
+  printf("  -l, --log-level=NUM        log level\n");
 #ifdef DEBUG_REFILL
   printf("  -T, --track-instr=ADDR     track refill action concerning ADDR\n");
 #endif
@@ -106,6 +107,7 @@ inline EmuArgs parse_args(int argc, const char *argv[]) {
     { "image",             1, NULL, 'i' },
     { "log-begin",         1, NULL, 'b' },
     { "log-end",           1, NULL, 'e' },
+    { "log-level",         1, NULL, 'l' },
     { "flash",             1, NULL, 'F' },
     { "help",              0, NULL, 'h' },
     { 0,                   0, NULL,  0  }
@@ -113,7 +115,7 @@ inline EmuArgs parse_args(int argc, const char *argv[]) {
 
   int o;
   while ( (o = getopt_long(argc, const_cast<char *const*>(argv),
-          "-s:C:I:T:W:hi:m:b:e:F:", long_options, &long_index)) != -1) {
+          "-s:C:I:T:W:hi:m:b:e:l:F:", long_options, &long_index)) != -1) {
     switch (o) {
       case 0:
         switch (long_index) {
@@ -168,6 +170,7 @@ inline EmuArgs parse_args(int argc, const char *argv[]) {
       case 'i': args.image = optarg; break;
       case 'b': args.log_begin = atoll_strict(optarg, "log-begin");  break;
       case 'e': args.log_end = atoll_strict(optarg, "log-end"); break;
+      case 'l': args.log_level = atoll_strict(optarg, "log-end"); break;
       case 'F': args.flash_bin = optarg; break;
     }
   }
@@ -205,7 +208,8 @@ Emulator::Emulator(int argc, const char *argv[]):
 
   // init ram
   init_ram(args.image);
-  init_flash(args.flash_bin);
+  // TODO : perhps we do not need flash there in la32r diff?
+  // init_flash(args.flash_bin);
 
 #ifdef DEBUG_TILELINK
   // init logger
@@ -240,6 +244,7 @@ Emulator::Emulator(int argc, const char *argv[]):
   // set log time range and log level
   dut_ptr->io_logCtrl_log_begin = args.log_begin;
   dut_ptr->io_logCtrl_log_end = args.log_end;
+  dut_ptr->io_logCtrl_log_level = args.log_level;
 }
 
 Emulator::~Emulator() {
@@ -725,7 +730,8 @@ void Emulator::fork_child_init() {
   DynamicSimulatorConfig nemu_config;
   nemu_config.debug_difftest = true;
   for (int i = 0; i < NUM_CORES; i++) {
-    difftest[i]->proxy->update_config(&nemu_config);
+    panic("la32r diff does not support this\n");
+    // difftest[i]->proxy->update_config(&nemu_config);
   }
 #endif
 }

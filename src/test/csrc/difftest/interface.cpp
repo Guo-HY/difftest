@@ -89,24 +89,24 @@ INTERFACE_INSTR_COMMIT {
 INTERFACE_CSR_STATE {
   RETURN_NO_NULL
   auto packet = difftest[coreid]->get_csr_state();
-  packet->priviledgeMode = priviledgeMode;
-  packet->mstatus = mstatus;
-  packet->sstatus = sstatus;
-  packet->mepc = mepc;
-  packet->sepc = sepc;
-  packet->mtval = mtval;
-  packet->stval = stval;
-  packet->mtvec = mtvec;
-  packet->stvec = stvec;
-  packet->mcause = mcause;
-  packet->scause = scause;
-  packet->satp = satp;
-  packet->mip = mip;
-  packet->mie = mie;
-  packet->mscratch = mscratch;
-  packet->sscratch = sscratch;
-  packet->mideleg = mideleg;
-  packet->medeleg = medeleg;
+  // packet->priviledgeMode = priviledgeMode;
+  // packet->mstatus = mstatus;
+  // packet->sstatus = sstatus;
+  // packet->mepc = mepc;
+  // packet->sepc = sepc;
+  // packet->mtval = mtval;
+  // packet->stval = stval;
+  // packet->mtvec = mtvec;
+  // packet->stvec = stvec;
+  // packet->mcause = mcause;
+  // packet->scause = scause;
+  // packet->satp = satp;
+  // packet->mip = mip;
+  // packet->mie = mie;
+  // packet->mscratch = mscratch;
+  // packet->sscratch = sscratch;
+  // packet->mideleg = mideleg;
+  // packet->medeleg = medeleg;
 }
 
 INTERFACE_DM_STATE {
@@ -175,38 +175,38 @@ INTERFACE_FP_WRITEBACK {
 INTERFACE_FP_REG_STATE {
   RETURN_NO_NULL
   auto packet = difftest[coreid]->get_arch_reg_state();
-  packet->fpr[ 0] = fpr_0;
-  packet->fpr[ 1] = fpr_1;
-  packet->fpr[ 2] = fpr_2;
-  packet->fpr[ 3] = fpr_3;
-  packet->fpr[ 4] = fpr_4;
-  packet->fpr[ 5] = fpr_5;
-  packet->fpr[ 6] = fpr_6;
-  packet->fpr[ 7] = fpr_7;
-  packet->fpr[ 8] = fpr_8;
-  packet->fpr[ 9] = fpr_9;
-  packet->fpr[10] = fpr_10;
-  packet->fpr[11] = fpr_11;
-  packet->fpr[12] = fpr_12;
-  packet->fpr[13] = fpr_13;
-  packet->fpr[14] = fpr_14;
-  packet->fpr[15] = fpr_15;
-  packet->fpr[16] = fpr_16;
-  packet->fpr[17] = fpr_17;
-  packet->fpr[18] = fpr_18;
-  packet->fpr[19] = fpr_19;
-  packet->fpr[20] = fpr_20;
-  packet->fpr[21] = fpr_21;
-  packet->fpr[22] = fpr_22;
-  packet->fpr[23] = fpr_23;
-  packet->fpr[24] = fpr_24;
-  packet->fpr[25] = fpr_25;
-  packet->fpr[26] = fpr_26;
-  packet->fpr[27] = fpr_27;
-  packet->fpr[28] = fpr_28;
-  packet->fpr[29] = fpr_29;
-  packet->fpr[30] = fpr_30;
-  packet->fpr[31] = fpr_31;
+  // packet->fpr[ 0] = fpr_0;
+  // packet->fpr[ 1] = fpr_1;
+  // packet->fpr[ 2] = fpr_2;
+  // packet->fpr[ 3] = fpr_3;
+  // packet->fpr[ 4] = fpr_4;
+  // packet->fpr[ 5] = fpr_5;
+  // packet->fpr[ 6] = fpr_6;
+  // packet->fpr[ 7] = fpr_7;
+  // packet->fpr[ 8] = fpr_8;
+  // packet->fpr[ 9] = fpr_9;
+  // packet->fpr[10] = fpr_10;
+  // packet->fpr[11] = fpr_11;
+  // packet->fpr[12] = fpr_12;
+  // packet->fpr[13] = fpr_13;
+  // packet->fpr[14] = fpr_14;
+  // packet->fpr[15] = fpr_15;
+  // packet->fpr[16] = fpr_16;
+  // packet->fpr[17] = fpr_17;
+  // packet->fpr[18] = fpr_18;
+  // packet->fpr[19] = fpr_19;
+  // packet->fpr[20] = fpr_20;
+  // packet->fpr[21] = fpr_21;
+  // packet->fpr[22] = fpr_22;
+  // packet->fpr[23] = fpr_23;
+  // packet->fpr[24] = fpr_24;
+  // packet->fpr[25] = fpr_25;
+  // packet->fpr[26] = fpr_26;
+  // packet->fpr[27] = fpr_27;
+  // packet->fpr[28] = fpr_28;
+  // packet->fpr[29] = fpr_29;
+  // packet->fpr[30] = fpr_30;
+  // packet->fpr[31] = fpr_31;
 }
 
 INTERFACE_SBUFFER_EVENT {

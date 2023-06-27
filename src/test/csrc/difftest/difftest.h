@@ -75,30 +75,23 @@ typedef struct {
 } instr_commit_t;
 
 typedef struct {
-  uint64_t gpr[32];
-  uint64_t fpr[32];
+  uint32_t gpr[32];
+  // uint64_t fpr[32];
 } arch_reg_state_t;
 
 typedef struct __attribute__((packed)) {
-  uint64_t this_pc;
-  uint64_t mstatus;
-  uint64_t mcause;
-  uint64_t mepc;
-  uint64_t sstatus;
-  uint64_t scause;
-  uint64_t sepc;
-  uint64_t satp;
-  uint64_t mip;
-  uint64_t mie;
-  uint64_t mscratch;
-  uint64_t sscratch;
-  uint64_t mideleg;
-  uint64_t medeleg;
-  uint64_t mtval;
-  uint64_t stval;
-  uint64_t mtvec;
-  uint64_t stvec;
-  uint64_t priviledgeMode;
+  uint32_t crmd;
+  uint32_t prmd;
+  uint32_t euen;
+  uint32_t ecfg;
+  uint32_t era, badv, eentry;
+  uint32_t tlbidx, tlbehi, tlbelo0, tlbelo1;
+  uint32_t asid, pgdl, pgdh;
+  uint32_t save0, save1, save2, save3;
+  uint32_t tid, tcfg, tval; // ticlr;
+  uint32_t llbctl, tlbrentry, dmw0, dmw1;
+  uint32_t estat;
+  uint32_t this_pc;
 } arch_csr_state_t;
 
 typedef struct __attribute__((packed)) {
@@ -110,7 +103,9 @@ typedef struct __attribute__((packed)) {
 } debug_mode_t;
 
 #ifndef DEBUG_MODE_DIFF
-const int DIFFTEST_NR_REG = (sizeof(arch_reg_state_t) + sizeof(arch_csr_state_t)) / sizeof(uint64_t);
+const int DIFFTEST_NR_REG = (sizeof(arch_reg_state_t) + sizeof(arch_csr_state_t)) / sizeof(uint32_t);
+const int DIFFTEST_NR_INTREG = sizeof(arch_reg_state_t) / sizeof(uint32_t);
+const int DIFFTEST_NR_CSRREG = sizeof(arch_csr_state_t) / sizeof(uint32_t);
 #else
 const int DIFFTEST_NR_REG = (sizeof(arch_reg_state_t) + sizeof(arch_csr_state_t) + sizeof(debug_mode_t)) / sizeof(uint64_t);
 #endif
@@ -367,8 +362,11 @@ protected:
   int id;
   difftest_core_state_t dut;
   difftest_core_state_t ref;
-  uint64_t *ref_regs_ptr = (uint64_t*)&ref.regs;
-  uint64_t *dut_regs_ptr = (uint64_t*)&dut.regs;
+  uint32_t *ref_regs_ptr = (uint32_t*)&ref.regs;
+  uint32_t *dut_regs_ptr = (uint32_t*)&dut.regs;
+
+  uint32_t *ref_csrs_ptr = (uint32_t*)&ref.csr;
+  uint32_t *dut_csrs_ptr = (uint32_t*)&dut.csr;
 
   bool progress = false;
   uint64_t ticks = 0;

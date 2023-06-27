@@ -20,24 +20,20 @@
 #include "flash.h"
 #include "spikedasm.h"
 
-static const char *reg_name[DIFFTEST_NR_REG+1] = {
-  "$0",  "ra",  "sp",   "gp",   "tp",  "t0",  "t1",   "t2",
-  "s0",  "s1",  "a0",   "a1",   "a2",  "a3",  "a4",   "a5",
-  "a6",  "a7",  "s2",   "s3",   "s4",  "s5",  "s6",   "s7",
-  "s8",  "s9",  "s10",  "s11",  "t3",  "t4",  "t5",   "t6",
-  "ft0", "ft1", "ft2",  "ft3",  "ft4", "ft5", "ft6",  "ft7",
-  "fs0", "fs1", "fa0",  "fa1",  "fa2", "fa3", "fa4",  "fa5",
-  "fa6", "fa7", "fs2",  "fs3",  "fs4", "fs5", "fs6",  "fs7",
-  "fs8", "fs9", "fs10", "fs11", "ft8", "ft9", "ft10", "ft11",
-  "this_pc",
-  "mstatus", "mcause", "mepc",
-  "sstatus", "scause", "sepc",
-  "satp",
-  "mip", "mie", "mscratch", "sscratch", "mideleg", "medeleg",
-  "mtval", "stval", "mtvec", "stvec", "mode",
-#ifdef DEBUG_MODE_DIFF
-  "debug mode", "dcsr", "dpc", "dscratch0", "dscratch1",
- #endif
+static const char* reg_name[DIFFTEST_NR_REG] = {
+        "r0",      "ra",     "tp",      "sp",      "a0",      "a1",     "a2",        "a3",        "a4",      "a5",
+        "a6",      "a7",     "t0",      "t1",      "t2",      "t3",     "t4",        "t5",        "t6",      "t7",
+        "t8",      " x",     "fp",      "s0",      "s1",      "s2",     "s3",        "s4",        "s5",      "s6",
+        "s7",      "s8",
+        "crmd",    "prmd",   "euen",    "ecfg",    "era",     "badv",   "eentry",    "tlbidx",    "tlbehi",  "tlbelo0",
+        "tlbelo1", "asid",   "pgdl",    "pgdh",    "save0",   "save1",  "save2",     "save3",     "tid",     "tcfg",
+        "tval",    "llbctl", "tlbrentry", "dmw0",  "dmw1",    "estat",   "this_pc"
+};
+
+static const char compare_mask[DIFFTEST_NR_CSRREG] = {
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  0,  1
 };
 
 Difftest **difftest = NULL;
@@ -135,12 +131,14 @@ int Difftest::step() {
   // interrupt has the highest priority
   if (dut.event.interrupt) {
     dut.csr.this_pc = dut.event.exceptionPC;
+    panic("not imple do_interrupt");
     do_interrupt();
   } else if (dut.event.exception) {
     // We ignored instrAddrMisaligned exception (0) for better debug interface
     // XiangShan should always support RVC, so instrAddrMisaligned will never happen
     // TODO: update NEMU, for now, NEMU will update pc when exception happen
     dut.csr.this_pc = dut.event.exceptionPC;
+    panic("not imple do_exception");
     do_exception();
   } else {
     // TODO: is this else necessary?
@@ -159,23 +157,19 @@ int Difftest::step() {
     return 0;
   }
 
-  proxy->regcpy(ref_regs_ptr, REF_TO_DUT);
+  proxy->regcpy(ref_regs_ptr, REF_TO_DUT, true);
 
   if (num_commit > 0) {
     state->record_group(dut.commit[0].pc, num_commit);
   }
 
   // swap nemu_pc and ref.csr.this_pc for comparison
-  uint64_t nemu_next_pc = ref.csr.this_pc;
+  uint32_t nemu_next_pc = ref.csr.this_pc;
   ref.csr.this_pc = nemu_this_pc;
   nemu_this_pc = nemu_next_pc;
 
-  // FIXME: the following code is dirty
-  if (dut_regs_ptr[72] != ref_regs_ptr[72]) {  // Ignore difftest for MIP
-    ref_regs_ptr[72] = dut_regs_ptr[72];
-  }
-
-  if (memcmp(dut_regs_ptr, ref_regs_ptr, DIFFTEST_NR_REG * sizeof(uint64_t))) {
+  // always compare integer regs
+  if (memcmp(dut_regs_ptr, ref_regs_ptr, DIFFTEST_NR_INTREG * sizeof(uint32_t))) {
     display();
     for (int i = 0; i < DIFFTEST_NR_REG; i ++) {
       if (dut_regs_ptr[i] != ref_regs_ptr[i]) {
@@ -185,37 +179,57 @@ int Difftest::step() {
     }
     return 1;
   }
+  if (ENABLE_CSR_DIFF) {
+    bool consistent = true;
+    for (int i = 0 ; i < sizeof(arch_csr_state_t) / sizeof(uint32_t); i++) {
+      if (dut_csrs_ptr[i] != ref_csrs_ptr[i] && compare_mask[i]) {
+        consistent = false;
+        break;
+      }
+    }
+    if (consistent == false) {
+      display();
+      for (int i = 0 ; i < sizeof(arch_csr_state_t) / sizeof(uint32_t); i++) {
+        if (dut_csrs_ptr[i] != ref_csrs_ptr[i] && compare_mask[i]) {
+           printf("%7s different at pc = 0x%010lx, right= 0x%016lx, wrong = 0x%016lx\n",
+            reg_name[i + 32], ref.csr.this_pc, ref_csrs_ptr[i], dut_csrs_ptr[i]);
+        }
+      }
+      return 1;
+    }
+  }
+
 
   return 0;
 }
 
 void Difftest::do_interrupt() {
-  state->record_abnormal_inst(dut.event.exceptionPC, dut.event.exceptionInst, RET_INT, dut.event.interrupt);
-  proxy->raise_intr(dut.event.interrupt | (1ULL << 63));
-  progress = true;
+  // state->record_abnormal_inst(dut.event.exceptionPC, dut.event.exceptionInst, RET_INT, dut.event.interrupt);
+  // proxy->raise_intr(dut.event.interrupt | (1ULL << 63));
+  // progress = true;
 }
 
 void Difftest::do_exception() {
-  state->record_abnormal_inst(dut.event.exceptionPC, dut.event.exceptionInst, RET_EXC, dut.event.exception);
-  if (dut.event.exception == 12 || dut.event.exception == 13 || dut.event.exception == 15) {
-    // printf("exception cause: %d\n", dut.event.exception);
-    struct ExecutionGuide guide;
-    guide.force_raise_exception = true;
-    guide.exception_num = dut.event.exception;
-    guide.mtval = dut.csr.mtval;
-    guide.stval = dut.csr.stval;
-    guide.force_set_jump_target = false;
-    proxy->guided_exec(&guide);
-  } else {
-  #ifdef DEBUG_MODE_DIFF
-    if(DEBUG_MEM_REGION(true, dut.event.exceptionPC)){
-      // printf("exception instr is %x\n", dut.event.exceptionInst);
-      debug_mode_copy(dut.event.exceptionPC, 4, dut.event.exceptionInst);
-    }
-  #endif
-    proxy->exec(1);
-  }
-  progress = true;
+  // state->record_abnormal_inst(dut.event.exceptionPC, dut.event.exceptionInst, RET_EXC, dut.event.exception);
+  // if (dut.event.exception == 12 || dut.event.exception == 13 || dut.event.exception == 15) {
+  //   // printf("exception cause: %d\n", dut.event.exception);
+  //   struct ExecutionGuide guide;
+  //   guide.force_raise_exception = true;
+  //   guide.exception_num = dut.event.exception;
+  //   guide.mtval = dut.csr.mtval;
+  //   guide.stval = dut.csr.stval;
+  //   guide.force_set_jump_target = false;
+  //   proxy->guided_exec(&guide);
+  // } else {
+  // #ifdef DEBUG_MODE_DIFF
+  //   if(DEBUG_MEM_REGION(true, dut.event.exceptionPC)){
+  //     // printf("exception instr is %x\n", dut.event.exceptionInst);
+  //     debug_mode_copy(dut.event.exceptionPC, 4, dut.event.exceptionInst);
+  //   }
+  // #endif
+  //   proxy->exec(1);
+  // }
+  // progress = true;
 }
 
 void Difftest::do_instr_commit(int i) {
@@ -245,20 +259,20 @@ void Difftest::do_instr_commit(int i) {
 #endif
 
   // sync lr/sc reg status
-  if (dut.lrsc.valid) {
-    struct SyncState sync;
-    sync.lrscValid = dut.lrsc.success;
-    proxy->uarchstatus_cpy((uint64_t*)&sync, DUT_TO_REF); // sync lr/sc microarchitectural regs
-    // clear SC instruction valid bit
-    dut.lrsc.valid = 0;
-  }
+  // if (dut.lrsc.valid) {
+  //   struct SyncState sync;
+  //   sync.lrscValid = dut.lrsc.success;
+  //   proxy->uarchstatus_cpy((uint64_t*)&sync, DUT_TO_REF); // sync lr/sc microarchitectural regs
+  //   // clear SC instruction valid bit
+  //   dut.lrsc.valid = 0;
+  // }
 
   bool realWen = (dut.commit[i].rfwen && dut.commit[i].wdest != 0) || (dut.commit[i].fpwen);
 
   // MMIO accessing should not be a branch or jump, just +2/+4 to get the next pc
   // to skip the checking of an instruction, just copy the reg state to reference design
   if (dut.commit[i].skip || (DEBUG_MODE_SKIP(dut.commit[i].valid, dut.commit[i].pc, dut.commit[i].inst))) {
-    proxy->regcpy(ref_regs_ptr, REF_TO_DIFFTEST);
+    proxy->regcpy(ref_regs_ptr, REF_TO_DIFFTEST, true);
     ref.csr.this_pc += dut.commit[i].isRVC ? 2 : 4;
     if (realWen) {
       // We use the physical register file to get wdata
@@ -267,7 +281,7 @@ void Difftest::do_instr_commit(int i) {
       // printf("Debug Mode? %x is ls? %x\n", DEBUG_MEM_REGION(dut.commit[i].valid, dut.commit[i].pc), IS_LOAD_STORE(dut.commit[i].inst));
       // printf("skip %x %x %x %x %x\n", dut.commit[i].pc, dut.commit[i].inst, get_commit_data(i), dut.commit[i].wpdest, dut.commit[i].wdest);
     }
-    proxy->regcpy(ref_regs_ptr, DIFFTEST_TO_REF);
+    proxy->regcpy(ref_regs_ptr, DIFFTEST_TO_REF, true);
     return;
   }
 
@@ -281,7 +295,7 @@ void Difftest::do_instr_commit(int i) {
   // Handle load instruction carefully for SMP
   if (NUM_CORES > 1) {
     if (dut.load[i].fuType == 0xC || dut.load[i].fuType == 0xF) {
-      proxy->regcpy(ref_regs_ptr, REF_TO_DUT);
+      proxy->regcpy(ref_regs_ptr, REF_TO_DUT, true);
       if (realWen && ref_regs_ptr[dut.commit[i].fpwen * 32 + dut.commit[i].wdest] != get_commit_data(i)) {
         // printf("---[DIFF Core%d] This load instruction gets rectified!\n", this->id);
         // printf("---    ltype: 0x%x paddr: 0x%lx wen: 0x%x wdst: 0x%x wdata: 0x%lx pc: 0x%lx\n", dut.load[i].opType, dut.load[i].paddr, dut.commit[i].wen, dut.commit[i].wdest, get_commit_data(i), dut.commit[i].pc);
@@ -319,13 +333,13 @@ void Difftest::do_instr_commit(int i) {
           proxy->memcpy(dut.load[i].paddr, &golden, len, DUT_TO_DIFFTEST);
           if (realWen) {
             ref_regs_ptr[dut.commit[i].fpwen * 32 + dut.commit[i].wdest] = get_commit_data(i);
-            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST);
+            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST, true);
           }
         } else if (dut.load[i].fuType == 0xF) {  //  atomic instr carefully handled
           proxy->memcpy(dut.load[i].paddr, &golden, len, DIFFTEST_TO_REF);
           if (realWen) {
             ref_regs_ptr[dut.commit[i].fpwen * 32 + dut.commit[i].wdest] = get_commit_data(i);
-            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST);
+            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST, true);
           }
         } else {
 #ifdef DEBUG_SMP
@@ -339,13 +353,19 @@ void Difftest::do_instr_commit(int i) {
           proxy->memcpy(dut.load[i].paddr, &golden, len, DUT_TO_DIFFTEST);
           if (realWen) {
             ref_regs_ptr[dut.commit[i].fpwen * 32 + dut.commit[i].wdest] = get_commit_data(i);
-            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST);
+            proxy->regcpy(ref_regs_ptr, DUT_TO_DIFFTEST, true);
           }
 #endif
         }
       }
     }
   }
+}
+
+void sync_csr_state_to_reset(arch_csr_state_t* csr) {
+  printf("reset csr state in DIFF\n");
+  memset(csr, 0, sizeof(arch_csr_state_t));
+  csr->crmd = 8; // ONLY CRMD.DA = 1
 }
 
 void Difftest::do_first_instr_commit() {
@@ -356,16 +376,17 @@ void Difftest::do_first_instr_commit() {
     }
 #endif
     printf("The first instruction of core %d has commited. Difftest enabled. \n", id);
+    sync_csr_state_to_reset(&(dut.csr)); // use this func to sync nemu's csr to reset state
     has_commit = 1;
     nemu_this_pc = FIRST_INST_ADDRESS;
 
-    proxy->load_flash_bin(get_flash_path(), get_flash_size());
-    proxy->memcpy(0x80000000, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
+    // proxy->load_flash_bin(get_flash_path(), get_flash_size());
+    proxy->memcpy(FIRST_INST_ADDRESS, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
     // Use a temp variable to store the current pc of dut
     uint64_t dut_this_pc = dut.csr.this_pc;
     // NEMU should always start at FIRST_INST_ADDRESS
     dut.csr.this_pc = FIRST_INST_ADDRESS;
-    proxy->regcpy(dut_regs_ptr, DIFFTEST_TO_REF);
+    proxy->regcpy(dut_regs_ptr, DIFFTEST_TO_REF, true);
     dut.csr.this_pc = dut_this_pc;
     // Do not reconfig simulator 'proxy->update_config(&nemu_config)' here:
     // If this is main sim thread, simulator has its own initial config
@@ -382,10 +403,10 @@ int Difftest::do_store_check() {
     auto addr = dut.store[i].addr;
     auto data = dut.store[i].data;
     auto mask = dut.store[i].mask;
-    if (proxy->store_commit(&addr, &data, &mask)) {
+    if (proxy->store_commit(addr, data)) {
       display();
       printf("Mismatch for store commits %d: \n", i);
-      printf("  REF commits addr 0x%lx, data 0x%lx, mask 0x%x\n", addr, data, mask);
+      // printf("  REF commits addr 0x%lx, data 0x%lx, mask 0x%x\n", addr, data, mask);
       printf("  DUT commits addr 0x%lx, data 0x%lx, mask 0x%x\n",
         dut.store[i].addr, dut.store[i].data, dut.store[i].mask);
       return 1;
@@ -600,7 +621,7 @@ void Difftest::display() {
   printf("\n==============  REF Regs  ==============\n");
   fflush(stdout);
   proxy->isa_reg_display();
-  printf("priviledgeMode: %lu\n", dut.csr.priviledgeMode);
+  // printf("priviledgeMode: %lu\n", dut.csr.priviledgeMode);
 }
 
 void DiffState::display(int coreid) {

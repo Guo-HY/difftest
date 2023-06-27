@@ -27,7 +27,7 @@
 CoDRAMsim3 *dram = NULL;
 #endif
 
-static uint64_t *ram;
+static XLEN_t *ram;
 static long img_size = 0;
 static pthread_mutex_t ram_mutex;
 
@@ -130,12 +130,12 @@ void init_ram(const char *img) {
   printf("The image is %s\n", img);
 
   // initialize memory using Linux mmap
-  ram = (uint64_t *)mmap(NULL, EMU_RAM_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-  if (ram == (uint64_t *)MAP_FAILED) {
+  ram = (XLEN_t *)mmap(NULL, EMU_RAM_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+  if (ram == (XLEN_t *)MAP_FAILED) {
     printf("Warning: Insufficient phisical memory\n");
     EMU_RAM_SIZE = 128 * 1024 * 1024UL;
-    ram = (uint64_t *)mmap(NULL, EMU_RAM_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    if (ram == (uint64_t *)MAP_FAILED) {
+    ram = (XLEN_t *)mmap(NULL, EMU_RAM_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (ram == (XLEN_t *)MAP_FAILED) {
       printf("Error: Cound not mmap 0x%lx bytes\n", EMU_RAM_SIZE);
       assert(0);
     }
@@ -199,20 +199,23 @@ void ram_finish() {
 extern "C" uint64_t ram_read_helper(uint8_t en, uint64_t rIdx) {
   if (!ram)
     return 0;
-  if (en && rIdx >= EMU_RAM_SIZE / sizeof(uint64_t)) {
-    rIdx %= EMU_RAM_SIZE / sizeof(uint64_t);
+  if (en && rIdx >= EMU_RAM_SIZE / sizeof(XLEN_t)) {
+    rIdx %= EMU_RAM_SIZE / sizeof(XLEN_t);
   }
   pthread_mutex_lock(&ram_mutex);
   uint64_t rdata = (en) ? ram[rIdx] : 0;
   pthread_mutex_unlock(&ram_mutex);
+  // if (en) {
+  //   printf("ram_read_helper : rIdx after=0x%lx, rdata=0x%lx\n", rIdx, rdata);
+  // }
   return rdata;
 }
 
 extern "C" void ram_write_helper(uint64_t wIdx, uint64_t wdata, uint64_t wmask, uint8_t wen) {
   if (wen && ram) {
-    if (wIdx >= EMU_RAM_SIZE / sizeof(uint64_t)) {
+    if (wIdx >= EMU_RAM_SIZE / sizeof(XLEN_t)) {
       printf("ERROR: ram wIdx = 0x%lx out of bound!\n", wIdx);
-      assert(wIdx < EMU_RAM_SIZE / sizeof(uint64_t));
+      assert(wIdx < EMU_RAM_SIZE / sizeof(XLEN_t));
     }
     pthread_mutex_lock(&ram_mutex);
     ram[wIdx] = (ram[wIdx] & ~wmask) | (wdata & wmask);
@@ -221,19 +224,19 @@ extern "C" void ram_write_helper(uint64_t wIdx, uint64_t wdata, uint64_t wmask, 
 }
 
 uint64_t pmem_read(uint64_t raddr) {
-  if (raddr % sizeof(uint64_t)) {
-    printf("Warning: pmem_read only supports 64-bit aligned memory access\n");
-  }
-  raddr -= 0x80000000;
-  return ram_read_helper(1, raddr / sizeof(uint64_t));
+  // if (raddr % sizeof(uint64_t)) {
+  //   printf("Warning: pmem_read only supports 64-bit aligned memory access\n");
+  // }
+  raddr -= FIRST_INST_ADDRESS;
+  return ram_read_helper(1, raddr / sizeof(XLEN_t));
 }
 
 void pmem_write(uint64_t waddr, uint64_t wdata) {
-  if (waddr % sizeof(uint64_t)) {
-    printf("Warning: pmem_write only supports 64-bit aligned memory access\n");
-  }
-  waddr -= 0x80000000;
-  return ram_write_helper(waddr / sizeof(uint64_t), wdata, -1UL, 1);
+  // if (waddr % sizeof(uint64_t)) {
+  //   printf("Warning: pmem_write only supports 64-bit aligned memory access\n");
+  // }
+  waddr -= FIRST_INST_ADDRESS;
+  return ram_write_helper(waddr / sizeof(XLEN_t), wdata, -1UL, 1);
 }
 
 #ifdef WITH_DRAMSIM3

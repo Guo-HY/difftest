@@ -21,6 +21,7 @@
 #define NUM_CORES 1
 #endif
 
+typedef uint32_t XLEN_t;    // when we diff la32r, XLEN_t is uint32_t, else XLEN_t is uint64_t
 // -----------------------------------------------------------------------
 // Memory and device config
 // -----------------------------------------------------------------------
@@ -31,7 +32,7 @@ extern unsigned long EMU_RAM_SIZE;
 
 // first valid instruction's address, difftest starts from this instruction
 #ifndef FIRST_INST_ADDRESS
-#define FIRST_INST_ADDRESS 0x10000000
+#define FIRST_INST_ADDRESS 0x1c000000 // la32r reset vector
 #endif
 
 // sdcard image to be used in simulation
@@ -110,12 +111,18 @@ extern unsigned long EMU_FLASH_SIZE;
 // #define DEBUG_SMP
 
 // whether to check memory coherence during refilling
-#define DEBUG_REFILL
+// #define DEBUG_REFILL
 
 // dump all tilelink trace to a database
 // uncomment the following line to enable this feature
-#define DEBUG_TILELINK
+// #define DEBUG_TILELINK
 
+
+// -----------------------------------------------------------------------
+// CSR difftest config
+// -----------------------------------------------------------------------
+
+#define ENABLE_CSR_DIFF 0
 
 // -----------------------------------------------------------------------
 // Simulator run ahead config

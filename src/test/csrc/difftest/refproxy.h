@@ -25,23 +25,23 @@
 class RefProxy {
 public:
   // public callable functions
-  void (*memcpy)(paddr_t nemu_addr, void *dut_buf, size_t n, bool direction) = NULL;
-  void (*regcpy)(void *dut, bool direction) = NULL;
-  void (*csrcpy)(void *dut, bool direction) = NULL;
-  void (*uarchstatus_cpy)(void *dut, bool direction) = NULL;
-  int (*store_commit)(uint64_t *saddr, uint64_t *sdata, uint8_t *smask) = NULL;
-  void (*exec)(uint64_t n) = NULL;
-  vaddr_t (*guided_exec)(void *disambiguate_para) = NULL;
-  vaddr_t (*update_config)(void *config) = NULL;
-  void (*raise_intr)(uint64_t no) = NULL;
-  void (*isa_reg_display)() = NULL;
-  void (*query)(void *result_buffer, uint64_t type) = NULL;
-  void (*debug_mem_sync)(paddr_t addr, void *bytes, size_t size) = NULL;
-  void (*load_flash_bin)(void *flash_bin, size_t size) = NULL;
+  void (*memcpy)(paddr_t nemu_addr, void* dut_buf, size_t n, bool direction);
+  void (*regcpy)(void* dut, bool direction, bool do_csr);
+  void (*csrcpy)(void* dut, bool direction);
+  void (*uarchstatus_cpy)(void* dut, bool direction);
+  int (*store_commit)(uint64_t saddr, uint64_t sdata);
+  void (*exec)(uint64_t n);
+  vaddr_t (*guided_exec)(void* disambiguate_para);
+  void (*raise_intr)(uint64_t no);
+  void (*isa_reg_display)();
+  void (*tlbfill_index_set)(uint32_t index);
+  void (*timercpy)(void* dut);
+  void (*estat_sync)(uint32_t index, uint32_t mask);
+  int  (*check_end)();
 };
 
 #define NEMU_ENV_VARIABLE "NEMU_HOME"
-#define NEMU_SO_FILENAME  "build/riscv64-nemu-interpreter-so"
+#define NEMU_SO_FILENAME  "build/la32r-nemu-interpreter-so"
 class NemuProxy : public RefProxy {
 public:
   NemuProxy(int coreid);
@@ -50,11 +50,11 @@ private:
 
 #define SPIKE_ENV_VARIABLE "SPIKE_HOME"
 #define SPIKE_SO_FILENAME  "difftest/build/riscv64-spike-so"
-class SpikeProxy : public RefProxy {
-public:
-  SpikeProxy(int coreid);
-private:
-};
+// class SpikeProxy : public RefProxy {
+// public:
+//   SpikeProxy(int coreid);
+// private:
+// };
 
 struct SyncState {
   uint64_t lrscValid;

@@ -36,7 +36,7 @@ struct EmuArgs {
   uint64_t max_instr;
   uint64_t warmup_instr;
   uint64_t stat_cycles;
-  uint64_t log_begin, log_end;
+  uint64_t log_begin, log_end, log_level;
 #ifdef DEBUG_REFILL
   uint64_t track_instr;
 #endif
@@ -61,6 +61,7 @@ struct EmuArgs {
     stat_cycles = -1;
     log_begin = 1;
     log_end = -1;
+    log_level = 0;
 #ifdef DEBUG_REFILL
     track_instr = 0;
 #endif
