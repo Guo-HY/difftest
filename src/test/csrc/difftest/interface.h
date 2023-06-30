@@ -328,7 +328,8 @@ extern "C" int v_difftest_step();
     DPIC_ARG_BIT  valid,                 \
     DPIC_ARG_LONG storeAddr,             \
     DPIC_ARG_LONG storeData,             \
-    DPIC_ARG_BYTE storeMask              \
+    DPIC_ARG_BYTE storeMask,             \
+    DPIC_ARG_LONG pc                     \
   )
 
 // v_difftest_LoadEvent

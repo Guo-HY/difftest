@@ -136,6 +136,7 @@ class DiffStoreEventIO extends DifftestBundle with DifftestWithIndex {
   val storeAddr   = Input(UInt(64.W))
   val storeData   = Input(UInt(64.W))
   val storeMask   = Input(UInt(8.W))
+  val pc          = Input(UInt(64.W))
 }
 
 class DiffLoadEventIO extends DifftestBundle with DifftestWithIndex {

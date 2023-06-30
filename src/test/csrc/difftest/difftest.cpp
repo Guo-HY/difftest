@@ -97,9 +97,6 @@ int Difftest::step() {
     return 1;
   }
   do_first_instr_commit();
-  if (do_store_check()) {
-    return 1;
-  }
 
 #ifdef DEBUG_GOLDENMEM
   if (do_golden_memory_update()) {
@@ -152,6 +149,11 @@ int Difftest::step() {
       }
     }
   }
+  
+  if (do_store_check()) {
+    return 1;
+  }
+
 
   if (!progress) {
     return 0;
@@ -405,7 +407,7 @@ int Difftest::do_store_check() {
     auto mask = dut.store[i].mask;
     if (proxy->store_commit(addr, data)) {
       display();
-      printf("Mismatch for store commits %d: \n", i);
+      printf("Mismatch for store commits %d, instr pc=0x%lx: \n", i, dut.store[i].pc);
       // printf("  REF commits addr 0x%lx, data 0x%lx, mask 0x%x\n", addr, data, mask);
       printf("  DUT commits addr 0x%lx, data 0x%lx, mask 0x%x\n",
         dut.store[i].addr, dut.store[i].data, dut.store[i].mask);

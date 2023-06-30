@@ -118,6 +118,7 @@ typedef struct {
 } sbuffer_state_t;
 
 typedef struct {
+  uint64_t pc;
   uint8_t  valid = 0;
   uint64_t addr;
   uint64_t data;

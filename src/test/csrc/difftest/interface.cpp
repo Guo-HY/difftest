@@ -291,6 +291,7 @@ INTERFACE_STORE_EVENT {
     packet->addr = storeAddr;
     packet->data = storeData;
     packet->mask = storeMask;
+    packet->pc = pc;
   }
 }
 
