@@ -42,7 +42,7 @@ module RAMHelper(
   assign rdata = ram_read_helper(en, rIdx);
 
   always @(posedge clk) begin
-    ram_write_helper(wIdx, wdata, wmask, wen && en);
+    ram_write_helper(wIdx, wdata, wmask, wen);
   end
 
 endmodule
