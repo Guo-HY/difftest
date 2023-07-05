@@ -200,13 +200,14 @@ extern "C" uint64_t ram_read_helper(uint8_t en, uint64_t rIdx) {
   if (!ram)
     return 0;
   if (en && rIdx >= EMU_RAM_SIZE / sizeof(XLEN_t)) {
-    rIdx %= EMU_RAM_SIZE / sizeof(XLEN_t);
+    printf("ERROR: ram rIdx = 0x%lx out of bound!\n", rIdx);
+    assert(rIdx < EMU_RAM_SIZE / sizeof(XLEN_t));
   }
   pthread_mutex_lock(&ram_mutex);
   uint64_t rdata = (en) ? ram[rIdx] : 0;
   pthread_mutex_unlock(&ram_mutex);
   // if (en) {
-  //   printf("ram_read_helper : rIdx after=0x%lx, rdata=0x%lx\n", rIdx, rdata);
+  //   printf("ram_read_helper:rIdx=0x%lx rdata=0x%lx\n", rIdx, rdata);
   // }
   return rdata;
 }
@@ -220,6 +221,7 @@ extern "C" void ram_write_helper(uint64_t wIdx, uint64_t wdata, uint64_t wmask, 
     pthread_mutex_lock(&ram_mutex);
     ram[wIdx] = (ram[wIdx] & ~wmask) | (wdata & wmask);
     pthread_mutex_unlock(&ram_mutex);
+    // printf("ram_write_helper:wIdx=0x%x wdata=0x%x wmask=0x%x wen=%d\n", wIdx, wdata, wmask, wen);
   }
 }
 
