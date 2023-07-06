@@ -141,6 +141,49 @@ extern "C" int v_difftest_step();
     DPIC_ARG_LONG medeleg                \
   )
 
+#define INTERFACE_LA32RCSR_STATE         \
+  DIFFTEST_DPIC_FUNC_DECL(La32rCSRState)(\
+    DPIC_ARG_BYTE coreid,                \
+    DPIC_ARG_INT crmd,                   \
+    DPIC_ARG_INT prmd,                   \
+    DPIC_ARG_INT euen,                   \
+    DPIC_ARG_INT ecfg,                   \
+    DPIC_ARG_INT estat,                  \
+    DPIC_ARG_INT era,                    \
+    DPIC_ARG_INT badv,                   \
+    DPIC_ARG_INT eentry,                 \
+    DPIC_ARG_INT tlbidx,                 \
+    DPIC_ARG_INT tlbehi,                 \
+    DPIC_ARG_INT tlbelo0,                \
+    DPIC_ARG_INT tlbelo1,                \
+    DPIC_ARG_INT asid,                   \
+    DPIC_ARG_INT pgdl,                   \
+    DPIC_ARG_INT pgdh,                   \
+    DPIC_ARG_INT pgd,                    \
+    DPIC_ARG_INT cpuid,                  \
+    DPIC_ARG_INT save0,                  \
+    DPIC_ARG_INT save1,                  \
+    DPIC_ARG_INT save2,                  \
+    DPIC_ARG_INT save3,                  \
+    DPIC_ARG_INT tid,                    \
+    DPIC_ARG_INT tcfg,                   \
+    DPIC_ARG_INT tval,                   \
+    DPIC_ARG_INT ticlr,                  \
+    DPIC_ARG_INT llbctl,                 \
+    DPIC_ARG_INT tlbrentry,              \
+    DPIC_ARG_INT dmw0,                   \
+    DPIC_ARG_INT dmw1                    \
+  )
+
+#define INTERFACE_TIMER_SYNC            \
+  DIFFTEST_DPIC_FUNC_DECL(La32rTimerState)(\
+    DPIC_ARG_BYTE coreid,                \
+    DPIC_ARG_INT  counter_id,            \
+    DPIC_ARG_INT  stable_counter_l,      \
+    DPIC_ARG_INT  stable_counter_h,      \
+    DPIC_ARG_INT  time_val               \
+  )
+
 // v_difftest_DebugMode
 #define INTERFACE_DM_STATE               \
   DIFFTEST_DPIC_FUNC_DECL(DebugMode) (   \
@@ -455,5 +498,6 @@ INTERFACE_RUNAHEAD_EVENT;
 INTERFACE_RUNAHEAD_COMMIT_EVENT;
 INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
-
+INTERFACE_LA32RCSR_STATE;
+INTERFACE_TIMER_SYNC;
 #endif

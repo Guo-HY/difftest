@@ -96,6 +96,47 @@ class DiffCSRStateIO extends DifftestBundle {
   val medeleg = Input(UInt(64.W))
 }
 
+class DiffLa32rCSRStateIO extends DifftestBundle {
+  val crmd = Input(UInt(32.W))
+  val prmd = Input(UInt(32.W))
+  val euen = Input(UInt(32.W))
+  val ecfg = Input(UInt(32.W))
+  val estat = Input(UInt(32.W))
+  val era = Input(UInt(32.W))
+  val badv = Input(UInt(32.W))
+  val eentry = Input(UInt(32.W))
+  val tlbidx = Input(UInt(32.W))
+  val tlbehi = Input(UInt(32.W))
+  val tlbelo0 = Input(UInt(32.W))
+  val tlbelo1 = Input(UInt(32.W))
+  val asid = Input(UInt(32.W))
+  val pgdl = Input(UInt(32.W))
+  val pgdh = Input(UInt(32.W))
+  val pgd = Input(UInt(32.W))
+  val cpuid = Input(UInt(32.W))
+  val save0 = Input(UInt(32.W))
+  val save1 = Input(UInt(32.W))
+  val save2 = Input(UInt(32.W))
+  val save3 = Input(UInt(32.W))
+  val tid = Input(UInt(32.W))
+  val tcfg = Input(UInt(32.W))
+  val tval = Input(UInt(32.W))
+  val ticlr = Input(UInt(32.W))
+  val llbctl = Input(UInt(32.W))
+  val tlbrentry = Input(UInt(32.W))
+  val dmw0 = Input(UInt(32.W))
+  val dmw1 = Input(UInt(32.W))
+}
+
+// sync timer & stable counter state to NEMU
+// see la32r-nemu lib-include/difftest.h : struct la32r_timer
+class DiffLa32rTimerStateIO extends DifftestBundle {
+  val counter_id = Input(UInt(32.W))
+  val stable_counter_l = Input(UInt(32.W))
+  val stable_counter_h = Input(UInt(32.W))
+  val time_val = Input(UInt(32.W)) // is TVAL
+}
+
 class DiffDebugModeIO extends DifftestBundle {
   val debugMode = Input(Bool())
   val dcsr = Input(UInt(64.W))
@@ -295,6 +336,8 @@ class DifftestRunaheadEvent extends DifftestBaseModule(new DiffRunaheadEventIO)
 class DifftestRunaheadCommitEvent extends DifftestBaseModule(new DiffRunaheadCommitEventIO)
 class DifftestRunaheadRedirectEvent extends DifftestBaseModule(new DiffRunaheadRedirectEventIO)
 class DifftestRunaheadMemdepPred extends DifftestBaseModule(new DiffRunaheadMemdepPredIO)
+class DifftestLa32rCSRState extends DifftestBaseModule(new DiffLa32rCSRStateIO)
+class DifftestLa32rTimerState extends DifftestBaseModule(new DiffLa32rTimerStateIO)
 
 // Difftest emulator top
 

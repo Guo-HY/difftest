@@ -122,7 +122,7 @@ extern unsigned long EMU_FLASH_SIZE;
 // CSR difftest config
 // -----------------------------------------------------------------------
 
-#define ENABLE_CSR_DIFF 0
+#define ENABLE_CSR_DIFF 1
 
 // -----------------------------------------------------------------------
 // Simulator run ahead config

@@ -33,7 +33,7 @@ static const char* reg_name[DIFFTEST_NR_REG] = {
 static const char compare_mask[DIFFTEST_NR_CSRREG] = {
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  0,  1
+    1,  1,  1,  1,  1,  1,  0
 };
 
 Difftest **difftest = NULL;
@@ -287,6 +287,7 @@ void Difftest::do_instr_commit(int i) {
     return;
   }
 
+  proxy->timercpy(&dut.la32_timer);
   // single step exec
   proxy->exec(1);
   // when there's a fused instruction, let proxy execute one more instruction.
@@ -368,6 +369,7 @@ void sync_csr_state_to_reset(arch_csr_state_t* csr) {
   printf("reset csr state in DIFF\n");
   memset(csr, 0, sizeof(arch_csr_state_t));
   csr->crmd = 8; // ONLY CRMD.DA = 1
+  csr->asid = 0xA0000; // we need set ASIDBITS=10, see spec 7.5.4
 }
 
 void Difftest::do_first_instr_commit() {

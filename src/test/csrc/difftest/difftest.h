@@ -192,6 +192,15 @@ typedef struct {
   uint64_t fpr[DIFFTEST_MAX_PRF_SIZE];
 } physical_reg_state_t;
 
+typedef struct  {
+  // for stable_counter
+  uint32_t counter_id;
+  uint32_t stable_counter_l;
+  uint32_t stable_counter_h;
+  // for TVAL csr
+  uint32_t time_val;
+} la32_timer_t;
+
 typedef struct {
   trap_event_t      trap;
   arch_event_t      event;
@@ -211,6 +220,7 @@ typedef struct {
   run_ahead_redirect_event_t runahead_redirect;
   run_ahead_memdep_pred_t runahead_memdep_pred[DIFFTEST_RUNAHEAD_WIDTH];
   physical_reg_state_t pregs;
+  la32_timer_t       la32_timer;
 } difftest_core_state_t;
 
 enum retire_inst_type {
@@ -342,6 +352,10 @@ public:
   }
   inline debug_mode_t *get_debug_state() {
     return &(dut.dmregs);
+  }
+
+  inline la32_timer_t *get_la32_timer() {
+    return &(dut.la32_timer);
   }
 
 #ifdef DEBUG_REFILL

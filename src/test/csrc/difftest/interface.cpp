@@ -109,6 +109,49 @@ INTERFACE_CSR_STATE {
   // packet->medeleg = medeleg;
 }
 
+INTERFACE_LA32RCSR_STATE {
+  RETURN_NO_NULL
+  auto packet = difftest[coreid]->get_csr_state();
+  packet->crmd = crmd;
+  packet->prmd = prmd;
+  packet->euen = euen;
+  packet->ecfg = ecfg;
+  packet->estat = estat;
+  packet->era = era;
+  packet->badv = badv;
+  packet->eentry = eentry;
+  packet->tlbidx = tlbidx;
+  packet->tlbehi = tlbehi;
+  packet->tlbelo0 = tlbelo0;
+  packet->tlbelo1 = tlbelo1;
+  packet->asid = asid;
+  packet->pgdl = pgdl;
+  packet->pgdh = pgdh;
+  // packet->pgd = pgd;
+  // packet->cpuid = cpuid;
+  packet->save0 = save0;
+  packet->save1 = save1;
+  packet->save2 = save2;
+  packet->save3 = save3;
+  packet->tid = tid;
+  packet->tcfg = tcfg;
+  packet->tval = tval;
+  // packet->ticlr = ticlr;
+  packet->llbctl = llbctl;
+  packet->tlbrentry = tlbrentry;
+  packet->dmw0 = dmw0;
+  packet->dmw1 = dmw1;
+}
+
+INTERFACE_TIMER_SYNC {
+  RETURN_NO_NULL
+  auto packet = difftest[coreid]->get_la32_timer();
+  packet->counter_id = counter_id;
+  packet->stable_counter_h = stable_counter_h;
+  packet->stable_counter_l = stable_counter_l;
+  packet->time_val = time_val;
+}
+
 INTERFACE_DM_STATE {
   RETURN_NO_NULL
   auto packet = difftest[coreid]->get_debug_state();
