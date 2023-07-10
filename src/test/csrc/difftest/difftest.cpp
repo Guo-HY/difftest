@@ -273,19 +273,19 @@ void Difftest::do_instr_commit(int i) {
 
   // MMIO accessing should not be a branch or jump, just +2/+4 to get the next pc
   // to skip the checking of an instruction, just copy the reg state to reference design
-  if (dut.commit[i].skip || (DEBUG_MODE_SKIP(dut.commit[i].valid, dut.commit[i].pc, dut.commit[i].inst))) {
-    proxy->regcpy(ref_regs_ptr, REF_TO_DIFFTEST, true);
-    ref.csr.this_pc += dut.commit[i].isRVC ? 2 : 4;
-    if (realWen) {
-      // We use the physical register file to get wdata
-      // TODO: what if skip with fpwen?
-      ref_regs_ptr[dut.commit[i].wdest] = get_commit_data(i);
-      // printf("Debug Mode? %x is ls? %x\n", DEBUG_MEM_REGION(dut.commit[i].valid, dut.commit[i].pc), IS_LOAD_STORE(dut.commit[i].inst));
-      // printf("skip %x %x %x %x %x\n", dut.commit[i].pc, dut.commit[i].inst, get_commit_data(i), dut.commit[i].wpdest, dut.commit[i].wdest);
-    }
-    proxy->regcpy(ref_regs_ptr, DIFFTEST_TO_REF, true);
-    return;
-  }
+  // if (dut.commit[i].skip || (DEBUG_MODE_SKIP(dut.commit[i].valid, dut.commit[i].pc, dut.commit[i].inst))) {
+  //   proxy->regcpy(ref_regs_ptr, REF_TO_DIFFTEST, true);
+  //   ref.csr.this_pc += dut.commit[i].isRVC ? 2 : 4;
+  //   if (realWen) {
+  //     // We use the physical register file to get wdata
+  //     // TODO: what if skip with fpwen?
+  //     ref_regs_ptr[dut.commit[i].wdest] = get_commit_data(i);
+  //     // printf("Debug Mode? %x is ls? %x\n", DEBUG_MEM_REGION(dut.commit[i].valid, dut.commit[i].pc), IS_LOAD_STORE(dut.commit[i].inst));
+  //     // printf("skip %x %x %x %x %x\n", dut.commit[i].pc, dut.commit[i].inst, get_commit_data(i), dut.commit[i].wpdest, dut.commit[i].wdest);
+  //   }
+  //   proxy->regcpy(ref_regs_ptr, DIFFTEST_TO_REF, true);
+  //   return;
+  // }
 
   proxy->timercpy(&dut.la32_timer);
   // single step exec
@@ -293,6 +293,11 @@ void Difftest::do_instr_commit(int i) {
   // when there's a fused instruction, let proxy execute one more instruction.
   if (dut.commit[i].fused) {
     proxy->exec(1);
+  }
+
+  // device align by regcpy
+  if (dut.commit[i].skip) {
+    proxy->regcpy(dut_regs_ptr, DIFFTEST_TO_REF, false);
   }
 
   // Handle load instruction carefully for SMP
