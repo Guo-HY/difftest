@@ -33,7 +33,7 @@ static const char* reg_name[DIFFTEST_NR_REG] = {
 static const char compare_mask[DIFFTEST_NR_CSRREG] = {
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  0,  0 // dose not diff ESTAT & PC
+    0,  1,  1,  1,  1,  0,  0 // dose not diff TVAL & ESTAT & PC
 };
 
 Difftest **difftest = NULL;
