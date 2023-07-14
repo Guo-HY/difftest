@@ -33,7 +33,7 @@ static const char* reg_name[DIFFTEST_NR_REG] = {
 static const char compare_mask[DIFFTEST_NR_CSRREG] = {
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
     1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  0
+    1,  1,  1,  1,  1,  0,  0 // dose not diff ESTAT & PC
 };
 
 Difftest **difftest = NULL;
@@ -173,7 +173,7 @@ int Difftest::step() {
   // always compare integer regs
   if (memcmp(dut_regs_ptr, ref_regs_ptr, DIFFTEST_NR_INTREG * sizeof(uint32_t))) {
     display();
-    for (int i = 0; i < DIFFTEST_NR_REG; i ++) {
+    for (int i = 0; i < DIFFTEST_NR_INTREG; i ++) {
       if (dut_regs_ptr[i] != ref_regs_ptr[i]) {
         printf("%7s different at pc = 0x%010lx, right= 0x%016lx, wrong = 0x%016lx\n",
             reg_name[i], ref.csr.this_pc, ref_regs_ptr[i], dut_regs_ptr[i]);
@@ -184,7 +184,7 @@ int Difftest::step() {
   if (ENABLE_CSR_DIFF) {
     bool consistent = true;
     for (int i = 0 ; i < sizeof(arch_csr_state_t) / sizeof(uint32_t); i++) {
-      if (dut_csrs_ptr[i] != ref_csrs_ptr[i] && compare_mask[i]) {
+      if ((dut_csrs_ptr[i] != ref_csrs_ptr[i]) && compare_mask[i]) {
         consistent = false;
         break;
       }
@@ -192,7 +192,7 @@ int Difftest::step() {
     if (consistent == false) {
       display();
       for (int i = 0 ; i < sizeof(arch_csr_state_t) / sizeof(uint32_t); i++) {
-        if (dut_csrs_ptr[i] != ref_csrs_ptr[i] && compare_mask[i]) {
+        if ((dut_csrs_ptr[i] != ref_csrs_ptr[i]) && compare_mask[i]) {
            printf("%7s different at pc = 0x%010lx, right= 0x%016lx, wrong = 0x%016lx\n",
             reg_name[i + 32], ref.csr.this_pc, ref_csrs_ptr[i], dut_csrs_ptr[i]);
         }
