@@ -329,7 +329,7 @@ uint64_t Emulator::execute(uint64_t max_cycle, uint64_t max_instr) {
   difftest_init();
   init_device();
   if (args.enable_diff) {
-    init_goldenmem();
+    // init_goldenmem();
     init_nemuproxy();
   }
   if(args.enable_runahead){

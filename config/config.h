@@ -35,6 +35,8 @@ extern unsigned long EMU_RAM_SIZE;
 #define FIRST_INST_ADDRESS 0x1c000000 // la32r reset vector
 #endif
 
+#define RAM_BASE_ADDRESS 0 // see Nutshell Settings.RAMBase
+
 // sdcard image to be used in simulation
 // uncomment the following line to enable this feature
 // #define SDCARD_IMAGE "/home/xyn/workloads/debian/riscv-debian.img"

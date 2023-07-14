@@ -33,7 +33,7 @@ static pthread_mutex_t ram_mutex;
 
 unsigned long EMU_RAM_SIZE = DEFAULT_EMU_RAM_SIZE;
 
-void* get_img_start() { return &ram[0]; }
+void* get_img_start() { return ((char*)(&ram[0])) + FIRST_INST_ADDRESS - RAM_BASE_ADDRESS; }
 long get_img_size() { return img_size; }
 void* get_ram_start() { return &ram[0]; }
 long get_ram_size() { return EMU_RAM_SIZE; }
@@ -168,7 +168,8 @@ void init_ram(const char *img) {
     }
 
     fseek(fp, 0, SEEK_SET);
-    ret = fread(ram, img_size, 1, fp);
+    // assume bin is from 0x1c000000 and ram is from 0x0
+    ret = fread(get_img_start(), img_size, 1, fp);
 
     assert(ret == 1);
     fclose(fp);
