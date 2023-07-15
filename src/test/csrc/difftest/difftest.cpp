@@ -140,6 +140,15 @@ int Difftest::step() {
   } else {
     // TODO: is this else necessary?
     for (int i = 0; i < DIFFTEST_COMMIT_WIDTH && dut.commit[i].valid; i++) {
+        // align nemu exception handle with nutshell
+      proxy->estat_sync(dut.la32r_estat_sync.estat, dut.la32r_estat_sync.wmask);
+      if (dut.commit[i].difftestExceptionSkip) {
+        // printf("difftestExceptionSkip!pc=0x%x\n", dut.commit[i].pc);
+        for (int j = 0; j < DIFFTEST_COMMIT_WIDTH; j++) {
+          dut.commit[j].valid = 0;
+        }
+        return 0;
+      }
       do_instr_commit(i);
       dut.commit[i].valid = 0;
       num_commit++;
@@ -149,15 +158,15 @@ int Difftest::step() {
       }
     }
   }
-  
-  if (do_store_check()) {
-    return 1;
-  }
-
 
   if (!progress) {
     return 0;
   }
+  
+  if (do_store_check()) {
+    return 1;
+  }
+  
 
   proxy->regcpy(ref_regs_ptr, REF_TO_DUT, true);
 

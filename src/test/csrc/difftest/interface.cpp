@@ -83,6 +83,7 @@ INTERFACE_INSTR_COMMIT {
     packet->fpwen    = fpwen;
     packet->wpdest   = wpdest;
     packet->wdest    = wdest;
+    packet->difftestExceptionSkip = difftestExceptionSkip;
   }
 }
 
@@ -150,6 +151,13 @@ INTERFACE_TIMER_SYNC {
   packet->stable_counter_h = stable_counter_h;
   packet->stable_counter_l = stable_counter_l;
   packet->time_val = time_val;
+}
+
+INTERFACE_ESTAT_SYNC {
+  RETURN_NO_NULL
+  auto packet = difftest[coreid]->get_la32r_estat_sync();
+  packet->estat = estat;
+  packet->wmask = wmask;
 }
 
 INTERFACE_DM_STATE {

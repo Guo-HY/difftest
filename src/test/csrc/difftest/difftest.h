@@ -72,6 +72,7 @@ typedef struct {
   uint8_t  fpwen;
   uint32_t wpdest;
   uint8_t  wdest;
+  uint8_t difftestExceptionSkip;
 } instr_commit_t;
 
 typedef struct {
@@ -202,6 +203,11 @@ typedef struct  {
 } la32_timer_t;
 
 typedef struct {
+  uint32_t estat;
+  uint32_t wmask;
+} la32r_estat_sync_t;
+
+typedef struct {
   trap_event_t      trap;
   arch_event_t      event;
   instr_commit_t    commit[DIFFTEST_COMMIT_WIDTH];
@@ -221,6 +227,7 @@ typedef struct {
   run_ahead_memdep_pred_t runahead_memdep_pred[DIFFTEST_RUNAHEAD_WIDTH];
   physical_reg_state_t pregs;
   la32_timer_t       la32_timer;
+  la32r_estat_sync_t la32r_estat_sync;
 } difftest_core_state_t;
 
 enum retire_inst_type {
@@ -356,6 +363,10 @@ public:
 
   inline la32_timer_t *get_la32_timer() {
     return &(dut.la32_timer);
+  }
+
+  inline la32r_estat_sync_t *get_la32r_estat_sync() {
+    return &(dut.la32r_estat_sync);
   }
 
 #ifdef DEBUG_REFILL

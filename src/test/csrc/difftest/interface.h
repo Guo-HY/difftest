@@ -94,7 +94,7 @@ extern "C" int v_difftest_step();
     DPIC_ARG_BYTE wdest,                 \
     DPIC_ARG_LONG pc,                    \
     DPIC_ARG_INT  instr,                 \
-    DPIC_ARG_LONG wdata                  \
+    DPIC_ARG_BYTE difftestExceptionSkip  \
   )
 
 // v_difftest_BasicTrapEvent
@@ -182,6 +182,13 @@ extern "C" int v_difftest_step();
     DPIC_ARG_INT  stable_counter_l,      \
     DPIC_ARG_INT  stable_counter_h,      \
     DPIC_ARG_INT  time_val               \
+  )
+
+#define INTERFACE_ESTAT_SYNC            \
+  DIFFTEST_DPIC_FUNC_DECL(La32rEstatState)(\
+    DPIC_ARG_BYTE coreid,                 \
+    DPIC_ARG_INT  estat,                  \
+    DPIC_ARG_INT  wmask                   \
   )
 
 // v_difftest_DebugMode
@@ -500,4 +507,5 @@ INTERFACE_RUNAHEAD_REDIRECT_EVENT;
 INTERFACE_RUNAHEAD_MEMDEP_PRED;
 INTERFACE_LA32RCSR_STATE;
 INTERFACE_TIMER_SYNC;
+INTERFACE_ESTAT_SYNC;
 #endif

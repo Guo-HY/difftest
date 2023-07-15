@@ -62,6 +62,7 @@ class DiffBasicInstrCommitIO extends DifftestBundle with DifftestWithIndex {
 class DiffInstrCommitIO extends DiffBasicInstrCommitIO {
   val pc       = Input(UInt(64.W))
   val instr    = Input(UInt(32.W))
+  val difftestExceptionSkip = Input(Bool())
 }
 
 class DiffBasicTrapEventIO extends DifftestBundle {
@@ -135,6 +136,11 @@ class DiffLa32rTimerStateIO extends DifftestBundle {
   val stable_counter_l = Input(UInt(32.W))
   val stable_counter_h = Input(UInt(32.W))
   val time_val = Input(UInt(32.W)) // is TVAL
+}
+
+class DiffLa32rEstatStateIO extends DifftestBundle {
+  val estat = Input(UInt(32.W))
+  val wmask = Input(UInt(32.W))
 }
 
 class DiffDebugModeIO extends DifftestBundle {
@@ -338,6 +344,7 @@ class DifftestRunaheadRedirectEvent extends DifftestBaseModule(new DiffRunaheadR
 class DifftestRunaheadMemdepPred extends DifftestBaseModule(new DiffRunaheadMemdepPredIO)
 class DifftestLa32rCSRState extends DifftestBaseModule(new DiffLa32rCSRStateIO)
 class DifftestLa32rTimerState extends DifftestBaseModule(new DiffLa32rTimerStateIO)
+class DifftestLa32rEstatState extends DifftestBaseModule(new DiffLa32rEstatStateIO)
 
 // Difftest emulator top
 
