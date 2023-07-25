@@ -73,6 +73,7 @@ typedef struct {
   uint32_t wpdest;
   uint8_t  wdest;
   uint8_t difftestExceptionSkip;
+  uint8_t tlbModify;
 } instr_commit_t;
 
 typedef struct {
@@ -208,6 +209,17 @@ typedef struct {
 } la32r_estat_sync_t;
 
 typedef struct {
+  uint64_t entryhi;
+  uint32_t entrylo0;
+  uint32_t entrylo1;
+} la32r_tlb_entry_t;
+
+typedef struct {
+  uint8_t valid;
+  uint8_t index;
+} la32r_tlbfill_idx_sync_t;
+
+typedef struct {
   trap_event_t      trap;
   arch_event_t      event;
   instr_commit_t    commit[DIFFTEST_COMMIT_WIDTH];
@@ -228,6 +240,8 @@ typedef struct {
   physical_reg_state_t pregs;
   la32_timer_t       la32_timer;
   la32r_estat_sync_t la32r_estat_sync;
+  la32r_tlb_entry_t la32r_tlb_entrys[LA32R_TLB_ENTRY_NUM];
+  la32r_tlbfill_idx_sync_t   la32r_tlbfill_idx_sync;
 } difftest_core_state_t;
 
 enum retire_inst_type {
@@ -287,6 +301,7 @@ public:
   DIFF_PROXY *proxy = NULL;
   uint32_t num_commit = 0; // # of commits if made progress
   bool has_commit = false;
+  bool tlbModify = false;
   // Trigger a difftest checking procdure
   virtual int step();
   void update_nemuproxy(int);
@@ -297,6 +312,9 @@ public:
     return dut.trap.code;
   }
   void display();
+  void tlbentry_display(la32r_tlb_entry_t* entry);
+
+  void sync_tlb_state_to_nemu();
 
   // Difftest public APIs for dut: called from DPI-C functions (or testbench)
   // These functions generally do nothing but copy the information to core_state.
@@ -367,6 +385,14 @@ public:
 
   inline la32r_estat_sync_t *get_la32r_estat_sync() {
     return &(dut.la32r_estat_sync);
+  }
+
+  inline la32r_tlbfill_idx_sync_t *get_la32r_tlbfill_idx_sync() {
+    return &(dut.la32r_tlbfill_idx_sync);
+  }
+
+  inline la32r_tlb_entry_t *get_la32r_tlb_entry(uint8_t index) {
+    return &(dut.la32r_tlb_entrys[index]);
   }
 
 #ifdef DEBUG_REFILL

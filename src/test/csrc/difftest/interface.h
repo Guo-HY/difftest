@@ -94,7 +94,8 @@ extern "C" int v_difftest_step();
     DPIC_ARG_BYTE wdest,                 \
     DPIC_ARG_LONG pc,                    \
     DPIC_ARG_INT  instr,                 \
-    DPIC_ARG_BYTE difftestExceptionSkip  \
+    DPIC_ARG_BYTE difftestExceptionSkip, \
+    DPIC_ARG_BYTE tlbModify              \
   )
 
 // v_difftest_BasicTrapEvent
@@ -484,6 +485,23 @@ extern "C" int v_difftest_step();
     uint64_t* oracle_vaddr                         \
   )
 
+#define INTERFACE_TLBFILL_INDEX_SET                \
+  DIFFTEST_DPIC_FUNC_DECL(La32rTlbFillIndexSet) (  \
+    DPIC_ARG_BYTE coreid,                          \
+    DPIC_ARG_BYTE valid,                           \
+    DPIC_ARG_BYTE index                            \
+  )
+
+#define INTERFACE_TLBENTRY                         \
+  DIFFTEST_DPIC_FUNC_DECL(La32rTlbEntry) (         \
+    DPIC_ARG_BYTE coreid,                          \
+    DPIC_ARG_BYTE index,                           \
+    DPIC_ARG_LONG entryhi,                         \
+    DPIC_ARG_INT  entrylo0,                        \
+    DPIC_ARG_INT  entrylo1                         \
+  )
+
+
 INTERFACE_BASIC_INSTR_COMMIT;
 INTERFACE_ARCH_EVENT;
 INTERFACE_INSTR_COMMIT;
@@ -508,4 +526,6 @@ INTERFACE_RUNAHEAD_MEMDEP_PRED;
 INTERFACE_LA32RCSR_STATE;
 INTERFACE_TIMER_SYNC;
 INTERFACE_ESTAT_SYNC;
+INTERFACE_TLBFILL_INDEX_SET;
+INTERFACE_TLBENTRY;
 #endif

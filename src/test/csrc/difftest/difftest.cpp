@@ -124,6 +124,12 @@ int Difftest::step() {
 
 #endif
 
+  if (dut.la32r_tlbfill_idx_sync.valid) {
+    proxy->tlbfill_index_set(dut.la32r_tlbfill_idx_sync.index);
+  }
+
+  tlbModify = false;
+
   num_commit = 0; // reset num_commit this cycle to 0
   // interrupt has the highest priority
   if (dut.event.interrupt) {
@@ -152,6 +158,7 @@ int Difftest::step() {
       do_instr_commit(i);
       dut.commit[i].valid = 0;
       num_commit++;
+      tlbModify |= dut.commit[i].tlbModify;
       // TODO: let do_instr_commit return number of instructions in this uop
       if (dut.commit[i].fused) {
         num_commit++;
@@ -210,6 +217,34 @@ int Difftest::step() {
     }
   }
 
+  if (ENABLE_TLB_DIFF && tlbModify) {
+    for (int i = 0; i < LA32R_TLB_ENTRY_NUM; i++) {
+      proxy->tlbcpy(i, &(ref.la32r_tlb_entrys[i]));
+    }
+    bool consistent = true;
+
+    if (memcmp(dut.la32r_tlb_entrys, ref.la32r_tlb_entrys, sizeof(la32r_tlb_entry_t) * LA32R_TLB_ENTRY_NUM)) {
+      consistent = false;
+    }
+
+    if (consistent == false) {
+      display();
+      for (int i = 0; i < LA32R_TLB_ENTRY_NUM; i++) {
+        la32r_tlb_entry_t* dut_entry = &(dut.la32r_tlb_entrys[i]);
+        la32r_tlb_entry_t* ref_entry = &(ref.la32r_tlb_entrys[i]);
+        if (memcmp(dut_entry, ref_entry, sizeof(la32r_tlb_entry_t))) {
+            printf("tlb entry %d diff fail:\n", i);
+            printf("\t\tnemu:");
+            tlbentry_display(ref_entry);
+            printf("\n\t\tdut :");
+            tlbentry_display(dut_entry);
+            printf("\n");
+            consistent = false;
+        }
+      }
+      return 1;
+    }
+  }
 
   return 0;
 }
@@ -386,6 +421,13 @@ void sync_csr_state_to_reset(arch_csr_state_t* csr) {
   csr->asid = 0xA0000; // we need set ASIDBITS=10, see spec 7.5.4
 }
 
+void Difftest::sync_tlb_state_to_nemu() {
+  printf("sync tlb state to nemu\n");
+  for (int i = 0; i < LA32R_TLB_ENTRY_NUM; i++) {
+    proxy->tlbcpy_to_nemu(i, &(dut.la32r_tlb_entrys[i]));
+  }
+}
+
 void Difftest::do_first_instr_commit() {
   if (!has_commit && dut.commit[0].valid) {
 #ifndef BASIC_DIFFTEST_ONLY
@@ -395,6 +437,8 @@ void Difftest::do_first_instr_commit() {
 #endif
     printf("The first instruction of core %d has commited. Difftest enabled. \n", id);
     sync_csr_state_to_reset(&(dut.csr)); // use this func to sync nemu's csr to reset state
+    sync_tlb_state_to_nemu(); // use this func to sync nemu's tlb to dut state
+
     has_commit = 1;
     nemu_this_pc = FIRST_INST_ADDRESS;
 
@@ -686,5 +730,50 @@ void DiffState::display(int coreid) {
 }
 
 DiffState::DiffState() {
+
+}
+
+#pragma pack(8)
+typedef union {
+  struct {
+    uint32_t E    : 1;
+    uint32_t ASID : 10;
+    uint32_t G    : 1;
+    uint32_t PS   : 6;
+    uint32_t VPPN : 19;
+    uint32_t      : 27;    
+  };
+  uint64_t val;
+} EntryHi;
+#pragma pack()
+
+typedef union {
+  struct {
+    uint32_t V     : 1;
+    uint32_t D     : 1;
+    uint32_t MAT   : 2;
+    uint32_t PLV   : 2;
+    uint32_t PPN   : 24;
+    uint32_t pad0  : 2;
+  };
+  uint32_t val;  
+} EntryLo;
+
+void Difftest::tlbentry_display(la32r_tlb_entry_t* entry)
+{
+  EntryHi entryhi;
+  EntryLo entrylo[2];
+
+  memcpy(&entryhi, &(entry->entryhi), sizeof(EntryHi));
+  memcpy(&entrylo[0], &(entry->entrylo0), sizeof(EntryLo));
+  memcpy(&entrylo[1], &(entry->entrylo1), sizeof(EntryLo));
+
+  printf("entryhi:E=%x,ASID=0x%x,G=%x,PS=0x%x,VPPN=0x%x ", 
+  entryhi.E, entryhi.ASID, entryhi.G ,entryhi.PS, entryhi.VPPN);
+
+  for (int i = 0 ; i < 2; i++) {
+    printf("entrylo%d:V=%d,D=%d,MAT=%d,PLV=%d,PPN=0x%x ", 
+    i, entrylo[i].V, entrylo[i].D, entrylo[i].MAT, entrylo[i].PLV, entrylo[i].PPN);
+  }
 
 }

@@ -38,6 +38,8 @@ public:
   void (*timercpy)(void* dut);
   void (*estat_sync)(uint32_t index, uint32_t mask);
   int  (*check_end)();
+  void (*tlbcpy)(uint32_t index, void *dut); // copy specified tlb entry from nemu to difftest
+  void (*tlbcpy_to_nemu)(uint32_t index, void *dut); // copy specified tlb entry from difftest to nemu
 };
 
 #define NEMU_ENV_VARIABLE "NEMU_HOME"

@@ -84,6 +84,7 @@ INTERFACE_INSTR_COMMIT {
     packet->wpdest   = wpdest;
     packet->wdest    = wdest;
     packet->difftestExceptionSkip = difftestExceptionSkip;
+    packet->tlbModify = tlbModify;
   }
 }
 
@@ -451,4 +452,19 @@ INTERFACE_RUNAHEAD_MEMDEP_PRED {
     packet->pc = pc;
   }
   *oracle_vaddr = packet->oracle_vaddr;
+}
+
+INTERFACE_TLBFILL_INDEX_SET {
+  RETURN_NO_NULL
+  auto packet = difftest[coreid]->get_la32r_tlbfill_idx_sync();
+  packet->valid = valid;
+  packet->index = index;
+}
+
+INTERFACE_TLBENTRY {
+  RETURN_NO_NULL;
+  auto packet = difftest[coreid]->get_la32r_tlb_entry(index);
+  packet->entryhi = entryhi;
+  packet->entrylo0 = entrylo0;
+  packet->entrylo1 = entrylo1;
 }

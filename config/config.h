@@ -37,6 +37,10 @@ extern unsigned long EMU_RAM_SIZE;
 
 #define RAM_BASE_ADDRESS 0 // see Nutshell Settings.RAMBase
 
+#define LA32R_TLB_ENTRY_NUM 32 // need consistency with nemu and Nutshell
+
+#define ENABLE_TLB_DIFF 1
+
 // sdcard image to be used in simulation
 // uncomment the following line to enable this feature
 // #define SDCARD_IMAGE "/home/xyn/workloads/debian/riscv-debian.img"

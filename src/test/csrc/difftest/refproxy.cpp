@@ -92,6 +92,10 @@ NemuProxy::NemuProxy(int coreid) {
     estat_sync = (void (*)(uint32_t, uint32_t))dlsym(handle, "difftest_estat_sync");
     check_and_assert(estat_sync);
 
+    tlbcpy = (void (*)(uint32_t, void*))dlsym(handle, "difftest_tlbcpy_to_difftest");
+
+    tlbcpy_to_nemu = (void (*)(uint32_t, void*))dlsym(handle, "difftest_tlbcpy");
+
     auto nemu_init = (void (*)(void))dlsym(handle, "difftest_init");
     check_and_assert(nemu_init);
 
