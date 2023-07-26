@@ -643,7 +643,7 @@ int Difftest::check_timeout() {
   // check whether there're any commits in the last 5000 cycles
   if (has_commit && ticks > last_commit + stuck_limit) {
     eprintf("No instruction of core %d commits for %lu cycles, maybe get stuck\n"
-        "(please also check whether a fence.i instruction requires more than %lu cycles to flush the icache)\n",
+        "(please also check whether a ibar instruction requires more than %lu cycles to flush the icache and dcache)\n",
         id, stuck_limit, stuck_limit);
     eprintf("Let REF run one more instruction.\n");
     proxy->exec(1);
