@@ -23,7 +23,11 @@ NUM_CORES  ?= 1
 # Set this variable if your design is written in Verilog.
 USE_DIFFTEST_MAIN ?= 0
 
+ifeq ($(BUILD_DIR),)
 BUILD_DIR  = $(DESIGN_DIR)/build
+$(warning "BUILD_DIR is not set, use deprecated value: $(BUILD_DIR)")
+endif
+
 SIM_TOP_V  = $(BUILD_DIR)/$(SIM_TOP).v
 
 DIFF_SCALA_FILE = $(shell find ./src/main/scala -name '*.scala')
