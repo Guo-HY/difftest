@@ -19,6 +19,10 @@
 #include "common.h"
 #include "ram.h"
 #include "compress.h"
+#include <cstring>
+#include <fstream>
+#include <filesystem>
+#include <iostream>
 
 // #define TLB_UNITTEST
 
@@ -29,14 +33,17 @@ CoDRAMsim3 *dram = NULL;
 
 static XLEN_t *ram;
 static long img_size = 0;
+void* img_start = 0;
+paddr_t paddr_start = FIRST_INST_ADDRESS;
 static pthread_mutex_t ram_mutex;
 
 unsigned long EMU_RAM_SIZE = DEFAULT_EMU_RAM_SIZE;
 
-void* get_img_start() { return ((char*)(&ram[0])) + FIRST_INST_ADDRESS - RAM_BASE_ADDRESS; }
+void* get_img_start() { return img_start; }
 long get_img_size() { return img_size; }
 void* get_ram_start() { return &ram[0]; }
 long get_ram_size() { return EMU_RAM_SIZE; }
+paddr_t get_paddr_start() { return paddr_start; }
 
 #ifdef TLB_UNITTEST
 void addpageSv39() {
@@ -124,6 +131,43 @@ void addpageSv39() {
 }
 #endif
 
+int isVlogFile(const char* filename)
+{
+  assert(filename != NULL && strlen(filename) >= 5);
+  return !strcmp(filename + (strlen(filename) - 5), ".vlog");
+}
+
+int readFromVlog(unsigned char* ram, const char* filename)
+{
+  uint64_t img_size = 0;
+  uint64_t low_addr = 0xffffffff;
+  uint64_t high_addr = 0;
+  uint64_t offset = 0;
+  std::ifstream file(filename, std::ios::in);
+  std::string line;
+  while (std::getline(file, line)) {
+   if (line.substr(0, 1) == "@") {
+    offset = std::stoul(line.substr(1), nullptr, 16);
+    if (offset < low_addr) {
+      low_addr = offset;
+    }
+    // printf("load img from addr=0x%x\n", offset);
+   } else {
+    uint32_t x = std::stoul(line, nullptr, 16);
+    *(ram + offset) = x;
+    offset++;
+    if (offset > high_addr) {
+      high_addr = offset;
+    }
+   }
+  }
+  img_start = ((char*)(&ram[0])) + low_addr;
+  img_size = high_addr - low_addr + 10;
+  paddr_start = low_addr;
+  printf("img_start = 0x%x, img_size = %.2fK\n", low_addr, (double)img_size / 1024.0);
+  return img_size;
+}
+
 void init_ram(const char *img) {
   assert(img != NULL);
 
@@ -154,6 +198,11 @@ void init_ram(const char *img) {
     img_size = readFromGz(ram, img, EMU_RAM_SIZE, LOAD_RAM);
     assert(img_size >= 0);
   }
+  else if (isVlogFile(img)) {
+    printf("vlog file detected and loading image from extracted vlog file\n");
+    img_size = readFromVlog((unsigned char*)ram, img);
+    assert(img_size >= 0);
+  }
   else {
     FILE *fp = fopen(img, "rb");
     if (fp == NULL) {
@@ -163,6 +212,7 @@ void init_ram(const char *img) {
 
     fseek(fp, 0, SEEK_END);
     img_size = ftell(fp);
+    img_start = ((char*)(&ram[0])) + FIRST_INST_ADDRESS - RAM_BASE_ADDRESS;
     if (img_size > EMU_RAM_SIZE) {
       img_size = EMU_RAM_SIZE;
     }

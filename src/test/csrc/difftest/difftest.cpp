@@ -443,7 +443,7 @@ void Difftest::do_first_instr_commit() {
     nemu_this_pc = FIRST_INST_ADDRESS;
 
     // proxy->load_flash_bin(get_flash_path(), get_flash_size());
-    proxy->memcpy(FIRST_INST_ADDRESS, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
+    proxy->memcpy(get_paddr_start(), get_img_start(), get_img_size(), DIFFTEST_TO_REF);
     // Use a temp variable to store the current pc of dut
     uint64_t dut_this_pc = dut.csr.this_pc;
     // NEMU should always start at FIRST_INST_ADDRESS

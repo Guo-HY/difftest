@@ -30,6 +30,7 @@ long get_ram_size();
 
 void* get_img_start();
 long get_img_size();
+paddr_t get_paddr_start();
 
 uint64_t pmem_read(uint64_t raddr);
 void pmem_write(uint64_t waddr, uint64_t wdata);
